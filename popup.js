@@ -53,7 +53,22 @@ document.addEventListener('DOMContentLoaded', function() {
   // ステータスメッセージを表示する関数
   function showStatus(messageKey, type) {
     const message = chrome.i18n.getMessage(messageKey);
-    statusDiv.textContent = message;
+    console.log('Message key:', messageKey);
+    console.log('Retrieved message:', message);
+    
+    // メッセージが取得できない場合のフォールバック
+    const currentLocale = chrome.i18n.getUILanguage();
+    const isJapanese = currentLocale.startsWith('ja');
+    
+    const fallbackMessages = {
+      'copySuccessTitleUrl': isJapanese ? 'タイトル + URLをコピーしました' : 'Title + URL copied successfully',
+      'copySuccessMarkdown': isJapanese ? 'Markdown形式でコピーしました' : 'Markdown format copied successfully',
+      'copySuccessHtml': isJapanese ? 'HTML形式でコピーしました' : 'HTML format copied successfully',
+      'copyError': isJapanese ? 'コピーに失敗しました' : 'Failed to copy'
+    };
+    
+    const displayMessage = message || fallbackMessages[messageKey] || 'Copied successfully';
+    statusDiv.textContent = displayMessage;
     statusDiv.className = `status ${type}`;
     
     // 強制的に再描画してからshowクラスを追加
