@@ -107,6 +107,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const customPanel = document.getElementById('custom-panel');
     const toggleIcon = toggleBtn.querySelector('.toggle-icon');
     const formatInput = document.getElementById('custom-format');
+    const searchInput = document.getElementById('search-pattern');
+    const replaceInput = document.getElementById('replace-pattern');
     const previewBox = document.getElementById('custom-preview');
     const saveBtn = document.getElementById('save-custom');
     const cancelBtn = document.getElementById('cancel-custom');
@@ -117,12 +119,19 @@ document.addEventListener('DOMContentLoaded', function() {
       toggleIcon.classList.toggle('rotated');
     });
 
-    // フォーマット入力のリアルタイムプレビュー
-    formatInput.addEventListener('input', function() {
+    // リアルタイムプレビュー更新関数
+    function updatePreview() {
       const format = formatInput.value;
-      const preview = processCustomFormat(format, title, url);
+      const searchPattern = searchInput.value;
+      const replacePattern = replaceInput.value;
+      const preview = processCustomFormat(format, title, url, searchPattern, replacePattern);
       previewBox.textContent = preview;
-    });
+    }
+
+    // 各入力フィールドのイベントリスナー
+    formatInput.addEventListener('input', updatePreview);
+    searchInput.addEventListener('input', updatePreview);
+    replaceInput.addEventListener('input', updatePreview);
 
     // 保存ボタン（現在は動作確認のみ）
     saveBtn.addEventListener('click', function() {
@@ -133,6 +142,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // キャンセルボタン
     cancelBtn.addEventListener('click', function() {
       formatInput.value = '';
+      searchInput.value = '';
+      replaceInput.value = '';
       previewBox.textContent = '';
       customPanel.classList.add('hidden');
       toggleIcon.classList.remove('rotated');
@@ -140,11 +151,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 初期プレビュー
     formatInput.value = '{title} - {url}';
-    previewBox.textContent = processCustomFormat('{title} - {url}', title, url);
+    searchInput.value = ' - ';
+    replaceInput.value = ' | ';
+    updatePreview();
   }
 
   // カスタムフォーマット処理関数
-  function processCustomFormat(format, title, url) {
+  function processCustomFormat(format, title, url, searchPattern, replacePattern) {
     if (!format) return '';
 
     // 変数置換
@@ -152,33 +165,16 @@ document.addEventListener('DOMContentLoaded', function() {
       .replace(/\{title\}/g, title)
       .replace(/\{url\}/g, url);
 
-    // 正規表現置換（→以降の部分）
-    const regexMatch = result.match(/→\s*(.+)$/);
-    if (regexMatch) {
-      const regexPart = regexMatch[1].trim();
-      const textBeforeRegex = result.substring(0, result.indexOf('→')).trim();
-      
+    // 置換処理（検索パターンと置換文字列が指定されている場合）
+    if (searchPattern && searchPattern.trim() !== '') {
       try {
-        // 正規表現の構文解析（簡易版）
-        // s/pattern/replacement/g 形式を想定
-        const regexPattern = /^s\/(.+)\/(.+)\/([gimsuy]*)$/;
-        const match = regexPart.match(regexPattern);
-        
-        if (match) {
-          const pattern = match[1];
-          const replacement = match[2];
-          const flags = match[3];
-          
-          // エスケープされたスラッシュを処理
-          const cleanPattern = pattern.replace(/\\\//g, '/');
-          const cleanReplacement = replacement.replace(/\\\//g, '/');
-          
-          const regex = new RegExp(cleanPattern, flags);
-          result = textBeforeRegex.replace(regex, cleanReplacement);
-        }
+        // 特殊文字をエスケープ（正規表現として扱わない）
+        const escapedSearchPattern = searchPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escapedSearchPattern, 'g');
+        result = result.replace(regex, replacePattern || '');
       } catch (error) {
-        console.error('正規表現エラー:', error);
-        result = textBeforeRegex + ' [正規表現エラー]';
+        console.error('置換エラー:', error);
+        result += ' [置換エラー]';
       }
     }
 

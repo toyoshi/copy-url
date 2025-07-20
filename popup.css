@@ -205,6 +205,45 @@ h1 {
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
 }
 
+.replace-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.replace-inputs {
+  display: flex;
+  gap: 8px;
+}
+
+.replace-input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.replace-input-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #333;
+}
+
+.replace-input-group input {
+  width: 100%;
+  border: 1px solid #e1e5e9;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+}
+
+.replace-input-group input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
 .preview-section {
   display: flex;
   flex-direction: column;

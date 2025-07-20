@@ -63,6 +63,18 @@
     "message": "Format definition:",
     "description": "Label for format input"
   },
+  "replaceLabel": {
+    "message": "Replace rule (optional):",
+    "description": "Label for replace section"
+  },
+  "searchLabel": {
+    "message": "Search:",
+    "description": "Label for search input"
+  },
+  "replaceWithLabel": {
+    "message": "Replace:",
+    "description": "Label for replace input"
+  },
   "previewLabel": {
     "message": "Preview:",
     "description": "Label for preview section"

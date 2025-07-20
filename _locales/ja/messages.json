@@ -63,6 +63,18 @@
     "message": "フォーマット定義:",
     "description": "Label for format input"
   },
+  "replaceLabel": {
+    "message": "置換ルール（オプション）:",
+    "description": "Label for replace section"
+  },
+  "searchLabel": {
+    "message": "検索:",
+    "description": "Label for search input"
+  },
+  "replaceWithLabel": {
+    "message": "置換:",
+    "description": "Label for replace input"
+  },
   "previewLabel": {
     "message": "プレビュー:",
     "description": "Label for preview section"

@@ -37,7 +37,21 @@
       <div id="custom-panel" class="custom-panel hidden">
         <div class="custom-form">
           <label for="custom-format" data-i18n="formatLabel">フォーマット定義:</label>
-          <textarea id="custom-format" placeholder="{title} - {url} → s/ - / | /g" rows="3"></textarea>
+          <textarea id="custom-format" placeholder="{title} - {url}" rows="3"></textarea>
+          
+          <div class="replace-section">
+            <label data-i18n="replaceLabel">置換ルール（オプション）:</label>
+            <div class="replace-inputs">
+              <div class="replace-input-group">
+                <label for="search-pattern" data-i18n="searchLabel">検索:</label>
+                <input type="text" id="search-pattern" placeholder="検索パターン">
+              </div>
+              <div class="replace-input-group">
+                <label for="replace-pattern" data-i18n="replaceWithLabel">置換:</label>
+                <input type="text" id="replace-pattern" placeholder="置換文字列">
+              </div>
+            </div>
+          </div>
           
           <div class="preview-section">
             <label data-i18n="previewLabel">プレビュー:</label>
