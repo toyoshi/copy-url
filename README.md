@@ -1,4 +1,4 @@
-# Copy URL Chrome Extension
+# Just URL COPY FREE Chrome Extension
 
 現在のページのURLを様々な形式で簡単にコピーできるChromeエクステンションです。
 
@@ -30,7 +30,7 @@
 ## 使用方法
 
 1. コピーしたいURLのページを開く
-2. ブラウザのツールバーにある「Copy URL」アイコンをクリック
+2. ブラウザのツールバーにある「Just URL COPY FREE」アイコンをクリック
 3. 希望の形式のボタンをクリック
 4. クリップボードにコピーされ、ポップアップが自動で閉じる
 
