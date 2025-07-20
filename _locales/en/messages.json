@@ -68,12 +68,16 @@
     "description": "Label for replace section"
   },
   "searchLabel": {
-    "message": "Search:",
-    "description": "Label for search input"
+    "message": "Regex:",
+    "description": "Label for regex input"
   },
   "replaceWithLabel": {
     "message": "Replace:",
     "description": "Label for replace input"
+  },
+  "regexHelp": {
+    "message": "Example: / - /g to replace all \" - \", /^(.+)$/ to capture entire line",
+    "description": "Help text for regex usage"
   },
   "previewLabel": {
     "message": "Preview:",

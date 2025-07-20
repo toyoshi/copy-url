@@ -68,12 +68,16 @@
     "description": "Label for replace section"
   },
   "searchLabel": {
-    "message": "検索:",
-    "description": "Label for search input"
+    "message": "正規表現:",
+    "description": "Label for regex input"
   },
   "replaceWithLabel": {
     "message": "置換:",
     "description": "Label for replace input"
+  },
+  "regexHelp": {
+    "message": "例: / - /g で「 - 」を全て置換、/^(.+)$/ で行全体をキャプチャ",
+    "description": "Help text for regex usage"
   },
   "previewLabel": {
     "message": "プレビュー:",

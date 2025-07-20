@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 初期プレビュー
     formatInput.value = '{title} - {url}';
-    searchInput.value = ' - ';
+    searchInput.value = '/ - /g';
     replaceInput.value = ' | ';
     updatePreview();
   }
@@ -165,16 +165,29 @@ document.addEventListener('DOMContentLoaded', function() {
       .replace(/\{title\}/g, title)
       .replace(/\{url\}/g, url);
 
-    // 置換処理（検索パターンと置換文字列が指定されている場合）
+    // 正規表現置換処理
     if (searchPattern && searchPattern.trim() !== '') {
       try {
-        // 特殊文字をエスケープ（正規表現として扱わない）
-        const escapedSearchPattern = searchPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(escapedSearchPattern, 'g');
-        result = result.replace(regex, replacePattern || '');
+        // 正規表現の構文解析
+        // /pattern/flags 形式を想定
+        const regexMatch = searchPattern.match(/^\/(.+)\/([gimsuy]*)$/);
+        
+        if (regexMatch) {
+          const pattern = regexMatch[1];
+          const flags = regexMatch[2];
+          
+          // 正規表現オブジェクトを作成
+          const regex = new RegExp(pattern, flags);
+          result = result.replace(regex, replacePattern || '');
+        } else {
+          // 正規表現形式でない場合は、文字列として扱う
+          const escapedPattern = searchPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(escapedPattern, 'g');
+          result = result.replace(regex, replacePattern || '');
+        }
       } catch (error) {
-        console.error('置換エラー:', error);
-        result += ' [置換エラー]';
+        console.error('正規表現エラー:', error);
+        result += ' [正規表現エラー]';
       }
     }
 
