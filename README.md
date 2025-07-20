@@ -39,6 +39,7 @@
 - Chrome Extension Manifest V3
 - 必要な権限: `activeTab`, `clipboardWrite`
 - 純粋なHTML/CSS/JavaScriptで実装
+- 国際化対応（英語・日本語）
 
 ## 開発
 
@@ -49,7 +50,12 @@ copy-url/
 ├── popup.html         # ポップアップのHTML
 ├── popup.css          # ポップアップのスタイル
 ├── popup.js           # ポップアップのロジック
-├── icons/             # アイコンファイル（要作成）
+├── _locales/          # 国際化ファイル
+│   ├── en/            # 英語
+│   │   └── messages.json
+│   └── ja/            # 日本語
+│       └── messages.json
+├── icons/             # アイコンファイル
 └── README.md          # このファイル
 ```
 

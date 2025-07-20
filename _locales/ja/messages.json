@@ -1,0 +1,54 @@
+{
+  "appName": {
+    "message": "Copy URL",
+    "description": "Extension name"
+  },
+  "appDescription": {
+    "message": "現在のページのURLを様々な形式で簡単にコピーできます",
+    "description": "Extension description"
+  },
+  "popupTitle": {
+    "message": "Copy URL",
+    "description": "Popup title"
+  },
+  "copyTitleUrl": {
+    "message": "タイトル + URL",
+    "description": "Copy button for title and URL format"
+  },
+  "copyTitleUrlDesc": {
+    "message": "ページタイトル - https://example.com/page",
+    "description": "Description for title and URL format"
+  },
+  "copyMarkdown": {
+    "message": "Markdown形式",
+    "description": "Copy button for markdown format"
+  },
+  "copyMarkdownDesc": {
+    "message": "[ページタイトル](https://example.com/page)",
+    "description": "Description for markdown format"
+  },
+  "copyHtml": {
+    "message": "HTML形式",
+    "description": "Copy button for HTML format"
+  },
+  "copyHtmlDesc": {
+    "message": "<a href=\"...\">ページタイトル</a>",
+    "description": "Description for HTML format"
+  },
+  "copySuccessTitleUrl": {
+    "message": "タイトル + URLをコピーしました",
+    "description": "Success message for title and URL copy"
+  },
+  "copySuccessMarkdown": {
+    "message": "Markdown形式でコピーしました",
+    "description": "Success message for markdown copy"
+  },
+  "copySuccessHtml": {
+    "message": "HTML形式でコピーしました",
+    "description": "Success message for HTML copy"
+  },
+  "copyError": {
+    "message": "コピーに失敗しました",
+    "description": "Error message when copy fails"
+  }
+} 

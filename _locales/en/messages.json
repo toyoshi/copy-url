@@ -1,0 +1,54 @@
+{
+  "appName": {
+    "message": "Copy URL",
+    "description": "Extension name"
+  },
+  "appDescription": {
+    "message": "Copy current page URL in various formats easily",
+    "description": "Extension description"
+  },
+  "popupTitle": {
+    "message": "Copy URL",
+    "description": "Popup title"
+  },
+  "copyTitleUrl": {
+    "message": "Title + URL",
+    "description": "Copy button for title and URL format"
+  },
+  "copyTitleUrlDesc": {
+    "message": "Page Title - https://example.com/page",
+    "description": "Description for title and URL format"
+  },
+  "copyMarkdown": {
+    "message": "Markdown Format",
+    "description": "Copy button for markdown format"
+  },
+  "copyMarkdownDesc": {
+    "message": "[Page Title](https://example.com/page)",
+    "description": "Description for markdown format"
+  },
+  "copyHtml": {
+    "message": "HTML Format",
+    "description": "Copy button for HTML format"
+  },
+  "copyHtmlDesc": {
+    "message": "<a href=\"...\">Page Title</a>",
+    "description": "Description for HTML format"
+  },
+  "copySuccessTitleUrl": {
+    "message": "Title + URL copied successfully",
+    "description": "Success message for title and URL copy"
+  },
+  "copySuccessMarkdown": {
+    "message": "Markdown format copied successfully",
+    "description": "Success message for markdown copy"
+  },
+  "copySuccessHtml": {
+    "message": "HTML format copied successfully",
+    "description": "Success message for HTML copy"
+  },
+  "copyError": {
+    "message": "Failed to copy",
+    "description": "Error message when copy fails"
+  }
+} 
