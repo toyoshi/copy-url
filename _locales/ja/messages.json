@@ -152,7 +152,7 @@
     "description": "Label for custom JavaScript input"
   },
   "jsHelp": {
-    "message": "利用可能な変数: title, url, domain, path, date。フォーマット内で {js} として使用",
+    "message": "利用可能な変数: title, url, domain, path, date。フォーマット内で {js} として使用。制限された構文のみ対応",
     "description": "Help text for JavaScript usage"
   }
 } 

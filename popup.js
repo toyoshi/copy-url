@@ -102,32 +102,279 @@ document.addEventListener('DOMContentLoaded', function() {
           this.validateCode(code);
           
           // 安全なコンテキストを作成
-          const safeContext = {
-            title: context.title || '',
-            url: context.url || '',
-            domain: this.extractDomain(context.url),
-            path: this.extractPath(context.url),
-            date: new Date(),
-            ...this.allowedFunctions
+          const title = context.title || '';
+          const url = context.url || '';
+          const domain = this.extractDomain(context.url);
+          const path = this.extractPath(context.url);
+          const date = new Date();
+          
+          // プリセットされた関数を定義
+          const functions = {
+            // 文字列操作
+            substring: (str, start, end) => str.substring(start, end),
+            replace: (str, search, replace) => str.replace(search, replace),
+            toLowerCase: (str) => str.toLowerCase(),
+            toUpperCase: (str) => str.toUpperCase(),
+            trim: (str) => str.trim(),
+            split: (str, separator) => str.split(separator),
+            indexOf: (str, search) => str.indexOf(search),
+            lastIndexOf: (str, search) => str.lastIndexOf(search),
+            
+            // 配列操作
+            join: (arr, separator) => arr.join(separator),
+            slice: (arr, start, end) => arr.slice(start, end),
+            map: (arr, func) => arr.map(func),
+            filter: (arr, func) => arr.filter(func),
+            
+            // 数学関数
+            floor: (num) => Math.floor(num),
+            ceil: (num) => Math.ceil(num),
+            round: (num) => Math.round(num),
+            max: (...nums) => Math.max(...nums),
+            min: (...nums) => Math.min(...nums),
+            abs: (num) => Math.abs(num),
+            random: () => Math.random(),
+            
+            // 日時関数
+            getFullYear: (date) => date.getFullYear(),
+            getMonth: (date) => date.getMonth(),
+            getDate: (date) => date.getDate(),
+            getHours: (date) => date.getHours(),
+            getMinutes: (date) => date.getMinutes(),
+            getSeconds: (date) => date.getSeconds(),
+            getDay: (date) => date.getDay(),
+            
+            // 条件分岐
+            if: (condition, trueValue, falseValue) => condition ? trueValue : falseValue,
+            
+            // 文字列長
+            length: (str) => str.length,
+            
+            // 正規表現
+            test: (regex, str) => new RegExp(regex).test(str),
+            match: (regex, str) => str.match(new RegExp(regex))
           };
           
-          // 関数として実行
-          const func = new Function('title', 'url', 'domain', 'path', 'date', 'Math', 'Date', code);
-          return func(
-            safeContext.title,
-            safeContext.url,
-            safeContext.domain,
-            safeContext.path,
-            safeContext.date,
-            safeContext.Math,
-            safeContext.Date
-          );
+          // 安全な実行環境を作成
+          const safeEval = (expression) => {
+            // 基本的な算術演算と比較演算のみ許可
+            const allowedOperators = ['+', '-', '*', '/', '%', '===', '!==', '==', '!=', '>', '<', '>=', '<=', '&&', '||', '!'];
+            const allowedKeywords = ['true', 'false', 'null', 'undefined'];
+            
+            // 危険な文字列をチェック
+            const dangerousChars = ['(', ')', '{', '}', ';', '=', 'eval', 'Function', 'new'];
+            for (const char of dangerousChars) {
+              if (expression.includes(char)) {
+                throw new Error('危険な文字が含まれています');
+              }
+            }
+            
+            // 単純な式のみ評価
+            return this.evaluateSimpleExpression(expression, { title, url, domain, path, date, ...functions });
+          };
+          
+          // コードを安全に実行
+          return this.executeSafeCode(code, { title, url, domain, path, date, ...functions });
           
         } catch (error) {
           console.error('JavaScript実行エラー:', error);
           return `[エラー: ${error.message}]`;
         }
       }
+      
+      // 単純な式の評価
+      evaluateSimpleExpression(expression, context) {
+        // 変数置換
+        let result = expression;
+        for (const [key, value] of Object.entries(context)) {
+          if (typeof value === 'string') {
+            result = result.replace(new RegExp(`\\b${key}\\b`, 'g'), `"${value}"`);
+          } else if (typeof value === 'number') {
+            result = result.replace(new RegExp(`\\b${key}\\b`, 'g'), value.toString());
+          }
+        }
+        
+                 // 安全な評価（非常に制限的）
+         try {
+           // 基本的な算術演算のみ
+           if (/^[\d\s+\-*/().]+$/.test(result)) {
+             return this.evaluateMathExpression(result);
+           }
+           return result;
+         } catch {
+           return result;
+         }
+      }
+      
+      // 安全なコード実行
+      executeSafeCode(code, context) {
+        // プリセットされたパターンのみ許可
+        const patterns = [
+          // 条件分岐
+          {
+            pattern: /if\s*\(\s*(.+?)\s*\)\s*\?\s*(.+?)\s*:\s*(.+?)\s*$/,
+            handler: (match, context) => {
+              const condition = this.evaluateCondition(match[1], context);
+              const trueValue = this.evaluateValue(match[2], context);
+              const falseValue = this.evaluateValue(match[3], context);
+              return condition ? trueValue : falseValue;
+            }
+          },
+          // 文字列長チェック
+          {
+            pattern: /(.+?)\.length\s*(>|<|>=|<=|===|!==)\s*(\d+)/,
+            handler: (match, context) => {
+              const str = this.evaluateValue(match[1], context);
+              const operator = match[2];
+              const num = parseInt(match[3]);
+              return this.evaluateComparison(`"${str}".length`, operator, num);
+            }
+          },
+          // 文字列切り詰め
+          {
+            pattern: /(.+?)\.substring\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)/,
+            handler: (match, context) => {
+              const str = this.evaluateValue(match[1], context);
+              const start = parseInt(match[2]);
+              const end = parseInt(match[3]);
+              return str.substring(start, end);
+            }
+          }
+        ];
+        
+        // パターンマッチングで処理
+        for (const pattern of patterns) {
+          const match = code.match(pattern.pattern);
+          if (match) {
+            return pattern.handler(match, context);
+          }
+        }
+        
+        // 単純な変数参照
+        if (context[code]) {
+          return context[code];
+        }
+        
+        // デフォルトはコードをそのまま返す
+        return code;
+      }
+      
+      // 条件評価
+      evaluateCondition(condition, context) {
+        // 基本的な条件のみ評価
+        if (condition.includes('length')) {
+          const match = condition.match(/(.+?)\.length\s*(>|<|>=|<=|===|!==)\s*(\d+)/);
+          if (match) {
+            const str = this.evaluateValue(match[1], context);
+            const operator = match[2];
+            const num = parseInt(match[3]);
+                         return this.evaluateComparison(`"${str}".length`, operator, num);
+          }
+        }
+        
+        if (condition.includes('includes')) {
+          const match = condition.match(/(.+?)\.includes\s*\(\s*(.+?)\s*\)/);
+          if (match) {
+            const str = this.evaluateValue(match[1], context);
+            const search = this.evaluateValue(match[2], context);
+            return str.includes(search);
+          }
+        }
+        
+        return false;
+      }
+      
+      // 値評価
+      evaluateValue(value, context) {
+        value = value.trim();
+        
+        // 変数参照
+        if (context[value]) {
+          return context[value];
+        }
+        
+        // 文字列リテラル
+        if (value.startsWith('"') && value.endsWith('"')) {
+          return value.slice(1, -1);
+        }
+        
+        // 数値
+        if (!isNaN(value)) {
+          return parseInt(value);
+        }
+        
+                 return value;
+       }
+       
+       // 数学式の評価
+       evaluateMathExpression(expression) {
+         // 基本的な算術演算のみ
+         const tokens = expression.match(/[\d.]+|\+|\-|\*|\/|\(|\)/g) || [];
+         const stack = [];
+         const operators = [];
+         
+         for (const token of tokens) {
+           if (/\d/.test(token)) {
+             stack.push(parseFloat(token));
+           } else if (token === '(') {
+             operators.push(token);
+           } else if (token === ')') {
+             while (operators.length > 0 && operators[operators.length - 1] !== '(') {
+               this.applyOperator(stack, operators.pop());
+             }
+             if (operators.length > 0) {
+               operators.pop(); // '(' を削除
+             }
+           } else if (['+', '-', '*', '/'].includes(token)) {
+             while (operators.length > 0 && this.getPrecedence(operators[operators.length - 1]) >= this.getPrecedence(token)) {
+               this.applyOperator(stack, operators.pop());
+             }
+             operators.push(token);
+           }
+         }
+         
+         while (operators.length > 0) {
+           this.applyOperator(stack, operators.pop());
+         }
+         
+         return stack[0] || 0;
+       }
+       
+       // 演算子の優先度
+       getPrecedence(operator) {
+         if (operator === '*' || operator === '/') return 2;
+         if (operator === '+' || operator === '-') return 1;
+         return 0;
+       }
+       
+       // 演算子の適用
+       applyOperator(stack, operator) {
+         const b = stack.pop();
+         const a = stack.pop();
+         
+         switch (operator) {
+           case '+': stack.push(a + b); break;
+           case '-': stack.push(a - b); break;
+           case '*': stack.push(a * b); break;
+           case '/': stack.push(a / b); break;
+         }
+       }
+       
+       // 比較演算の評価
+       evaluateComparison(left, operator, right) {
+         const leftValue = typeof left === 'string' ? left.length : parseFloat(left);
+         const rightValue = parseFloat(right);
+         
+         switch (operator) {
+           case '>': return leftValue > rightValue;
+           case '<': return leftValue < rightValue;
+           case '>=': return leftValue >= rightValue;
+           case '<=': return leftValue <= rightValue;
+           case '===': return leftValue === rightValue;
+           case '!==': return leftValue !== rightValue;
+           default: return false;
+         }
+       }
       
       extractDomain(url) {
         try {
