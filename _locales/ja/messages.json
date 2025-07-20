@@ -4,7 +4,7 @@
     "description": "Extension name"
   },
   "appDescription": {
-    "message": "現在のページのURLを様々な形式で簡単にコピーできます",
+    "message": "URLを3つの形式（タイトル+URL、Markdown、HTML）でコピー。完全無料で追加料金不要です。",
     "description": "Extension description"
   },
   "popupTitle": {
