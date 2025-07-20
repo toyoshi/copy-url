@@ -5,17 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // 文字列置換の実行
       execute(code, context) {
         try {
-          const title = context.title || '';
-          const url = context.url || '';
-          const domain = this.extractDomain(context.url);
-          const path = this.extractPath(context.url);
-          
-          // 変数置換
-          let result = code
-            .replace(/\{title\}/g, title)
-            .replace(/\{url\}/g, url)
-            .replace(/\{domain\}/g, domain)
-            .replace(/\{path\}/g, path);
+          const inputText = context.title || '';
           
           // 文字列置換パターンを処理
           const replacePatterns = [
@@ -25,9 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
               handler: (match, pattern, replacement, flags) => {
                 try {
                   const regex = new RegExp(pattern, flags);
-                  return result.replace(regex, replacement);
+                  return inputText.replace(regex, replacement);
                 } catch (error) {
-                  return result;
+                  return inputText;
                 }
               }
             },
@@ -35,12 +25,13 @@ document.addEventListener('DOMContentLoaded', function() {
             {
               pattern: /"([^"]+)"\s*->\s*"([^"]*)"/g,
               handler: (match, search, replacement) => {
-                return result.replace(new RegExp(this.escapeRegExp(search), 'g'), replacement);
+                return inputText.replace(new RegExp(this.escapeRegExp(search), 'g'), replacement);
               }
             }
           ];
           
           // 置換パターンを適用
+          let result = inputText;
           for (const replacePattern of replacePatterns) {
             result = result.replace(replacePattern.pattern, replacePattern.handler);
           }
