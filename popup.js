@@ -175,8 +175,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleIcon = toggleBtn.querySelector('.toggle-icon');
     const formatNameInput = document.getElementById('format-name');
     const formatInput = document.getElementById('custom-format');
-    const searchInput = document.getElementById('search-pattern');
-    const replaceInput = document.getElementById('replace-pattern');
     const jsInput = document.getElementById('custom-js');
     const jsErrorDiv = document.getElementById('js-error');
     const previewBox = document.getElementById('custom-preview');
@@ -185,19 +183,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelBtn = document.getElementById('cancel-custom');
     const savedFormatsList = document.getElementById('saved-formats-list');
 
-
-
     let editingFormatId = null;
 
     // 保存された形式を読み込む関数
     function loadSavedFormats() {
       chrome.storage.sync.get(['customFormats'], function(result) {
         const formats = result.customFormats || [];
-        
-        // メインボタンエリアにカスタム形式ボタンを追加
         updateCustomFormatButtons(formats);
-        
-        // 保存された形式リストは非表示にする（メインボタンエリアに表示するため）
         savedFormatsList.innerHTML = '';
       });
     }
@@ -205,24 +197,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // メインボタンエリアにカスタム形式ボタンを追加する関数
     function updateCustomFormatButtons(formats) {
       const copyButtons = document.querySelector('.copy-buttons');
-      
-      if (!copyButtons) {
-        return;
-      }
-      
-      // 既存のカスタム形式ボタンを削除
+      if (!copyButtons) return;
       const existingCustomButtons = copyButtons.querySelectorAll('.custom-format-btn');
       existingCustomButtons.forEach(btn => btn.remove());
-      
-      // 新しいカスタム形式ボタンを追加
       formats.forEach(format => {
         const customButton = document.createElement('button');
         customButton.className = 'copy-btn custom-format-btn';
         customButton.dataset.formatId = format.id;
-        
-        // まずボタンをDOMに追加
         copyButtons.appendChild(customButton);
-        
         customButton.innerHTML = `
           <div class="btn-content">
             <span class="btn-title">${format.name}</span>
@@ -231,329 +213,97 @@ document.addEventListener('DOMContentLoaded', function() {
             <button class="edit-btn" title="編集">✏️</button>
           </div>
         `;
-        
-        // コピーイベントを追加
         customButton.addEventListener('click', function(e) {
-          // 編集ボタンがクリックされた場合はコピーしない
-          if (e.target.classList.contains('edit-btn')) {
-            return;
-          }
-          
-          // 現在のタブ情報を取得してコピー
+          if (e.target.classList.contains('edit-btn')) return;
           chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             const currentTab = tabs[0];
             const copiedText = processCustomFormat(
               format.format, 
               currentTab.title, 
               currentTab.url, 
-              format.searchPattern, 
-              format.replacePattern,
               format.jsCode
             );
             copyToClipboard(copiedText, 'customFormatCopied');
           });
         });
-        
-        // 編集ボタンのイベントを追加
         const editBtn = customButton.querySelector('.edit-btn');
         editBtn.addEventListener('click', function(e) {
           e.preventDefault();
           e.stopPropagation();
-          
-          // フォームに現在の値を設定
           editingFormatId = format.id;
           formatNameInput.value = format.name;
           formatInput.value = format.format;
-          searchInput.value = format.searchPattern;
-          replaceInput.value = format.replacePattern;
           jsInput.value = format.jsCode || '';
           jsErrorDiv.style.display = 'none';
           updatePreview();
-          
-          // カスタムパネルを開く
           customPanel.classList.remove('hidden');
           toggleIcon.classList.add('rotated');
-          
-          // 編集モードなので削除ボタンを表示
-          if (deleteBtn) {
-            deleteBtn.style.display = 'inline-block';
-          }
-        });
-        
-
-      });
-    }
-
-    // 形式アイテムを作成する関数
-    function createFormatItem(format) {
-      const item = document.createElement('div');
-      item.className = 'saved-format-item';
-      
-      // 現在のタブ情報を取得してプレビューを生成
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        const currentTab = tabs[0];
-        const preview = processCustomFormat(
-          format.format, 
-          currentTab.title, 
-          currentTab.url, 
-          format.searchPattern, 
-          format.replacePattern,
-          format.jsCode
-        );
-        
-        item.innerHTML = `
-          <div class="format-info" style="cursor: pointer;">
-            <div class="format-name">${format.name}</div>
-            <div class="format-preview">${preview}</div>
-          </div>
-          <div class="format-actions">
-            <a href="#" class="edit-link" data-i18n="editLink">編集</a>
-            <div class="edit-actions" style="display: none;">
-              <a href="#" class="edit-action save-action" data-i18n="saveAction">保存</a>
-              <a href="#" class="edit-action cancel-action" data-i18n="cancelAction">キャンセル</a>
-              <a href="#" class="edit-action delete-action delete" data-i18n="deleteAction">削除</a>
-            </div>
-          </div>
-        `;
-        
-        // 国際化を適用
-        const editLink = item.querySelector('.edit-link');
-        const saveAction = item.querySelector('.save-action');
-        const cancelAction = item.querySelector('.cancel-action');
-        const deleteAction = item.querySelector('.delete-action');
-        
-        editLink.textContent = chrome.i18n.getMessage('editLink') || '編集';
-        saveAction.textContent = chrome.i18n.getMessage('saveAction') || '保存';
-        cancelAction.textContent = chrome.i18n.getMessage('cancelAction') || 'キャンセル';
-        deleteAction.textContent = chrome.i18n.getMessage('deleteAction') || '削除';
-        
-        // イベントリスナーを追加
-        setupFormatItemEvents(item, format);
-      });
-      
-      return item;
-    }
-
-    // 形式アイテムのイベントを設定する関数
-    function setupFormatItemEvents(item, format) {
-      const formatInfo = item.querySelector('.format-info');
-      const editLink = item.querySelector('.edit-link');
-      const editActions = item.querySelector('.edit-actions');
-      const saveAction = item.querySelector('.save-action');
-      const cancelAction = item.querySelector('.cancel-action');
-      const deleteAction = item.querySelector('.delete-action');
-      
-      // 形式情報のクリック（コピー実行）
-      formatInfo.addEventListener('click', function(e) {
-        // 編集アクションが表示されている場合はコピーしない
-        if (editActions.style.display !== 'none') {
-          return;
-        }
-        
-        e.preventDefault();
-        
-        // 現在のタブ情報を取得してコピー
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-          const currentTab = tabs[0];
-          const copiedText = processCustomFormat(
-            format.format, 
-            currentTab.title, 
-            currentTab.url, 
-            format.searchPattern, 
-            format.replacePattern,
-            format.jsCode
-          );
-          
-          copyToClipboard(copiedText, 'customFormatCopied');
-        });
-      });
-      
-      // 編集リンクのクリック
-      editLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation(); // 親要素のクリックイベントを防ぐ
-        
-        // フォームに現在の値を設定
-        editingFormatId = format.id;
-        formatNameInput.value = format.name;
-        formatInput.value = format.format;
-        searchInput.value = format.searchPattern;
-        replaceInput.value = format.replacePattern;
-        jsInput.value = format.jsCode || '';
-        jsErrorDiv.style.display = 'none';
-        updatePreview();
-        
-        // カスタムパネルを開く
-        customPanel.classList.remove('hidden');
-        toggleIcon.classList.add('rotated');
-        
-        // 編集モードなので削除ボタンを表示
-        if (deleteBtn) {
-          deleteBtn.style.display = 'inline-block';
-        }
-        
-        // 編集モードを終了
-        editLink.style.display = 'inline';
-        editActions.style.display = 'none';
-      });
-      
-      // 保存アクション（編集モードでの保存）
-      saveAction.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation(); // 親要素のクリックイベントを防ぐ
-        
-        const formatName = formatNameInput.value.trim();
-        const formatText = formatInput.value.trim();
-        
-        if (!formatName) {
-          showStatus('formatNameRequired', 'error');
-          return;
-        }
-        
-        if (!formatText) {
-          showStatus('formatRequired', 'error');
-          return;
-        }
-
-        const updatedFormatData = {
-          id: format.id,
-          name: formatName,
-          format: formatText,
-          searchPattern: searchInput.value.trim(),
-          replacePattern: replaceInput.value.trim(),
-          jsCode: jsInput.value.trim()
-        };
-
-        saveCustomFormat(updatedFormatData);
-        clearForm();
-        showStatus('formatSaved', 'success');
-        
-        // 編集モードを終了
-        editLink.style.display = 'inline';
-        editActions.style.display = 'none';
-      });
-      
-      // キャンセルアクション
-      cancelAction.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation(); // 親要素のクリックイベントを防ぐ
-        // 編集モードを終了
-        editLink.style.display = 'inline';
-        editActions.style.display = 'none';
-      });
-      
-      // 削除アクション
-      deleteAction.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation(); // 親要素のクリックイベントを防ぐ
-        const deleteConfirmMessage = chrome.i18n.getMessage('deleteConfirm') || 'この形式を削除しますか？';
-        if (confirm(deleteConfirmMessage)) {
-          deleteCustomFormat(format.id);
-          loadSavedFormats();
-          showStatus('formatDeleted', 'success');
-        }
-      });
-    }
-
-    // カスタム形式を削除する関数
-    function deleteCustomFormat(formatId) {
-      chrome.storage.sync.get(['customFormats'], function(result) {
-        const formats = result.customFormats || [];
-        const filteredFormats = formats.filter(f => f.id !== formatId);
-        chrome.storage.sync.set({ customFormats: filteredFormats }, function() {
-          // 削除完了後にリストを更新
-          loadSavedFormats();
+          if (deleteBtn) deleteBtn.style.display = 'inline-block';
         });
       });
     }
 
-    // トグルボタンのクリックイベント
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', function() {
-        customPanel.classList.toggle('hidden');
-        toggleIcon.classList.toggle('rotated');
-        
-        // パネルが開いた時に保存された形式を読み込み
-        if (!customPanel.classList.contains('hidden')) {
-          loadSavedFormats();
-          
-          // 新規作成モードなので削除ボタンを非表示
-          if (deleteBtn) {
-            deleteBtn.style.display = 'none';
-          }
-        }
-      });
-    }
-
-    // リアルタイムプレビュー更新関数
+    // プレビュー更新
     function updatePreview() {
       const format = formatInput.value;
-      const searchPattern = searchInput.value;
-      const replacePattern = replaceInput.value;
       const jsCode = jsInput.value;
-      const preview = processCustomFormat(format, title, url, searchPattern, replacePattern, jsCode);
+      let preview = '';
+      let error = '';
+      try {
+        preview = processCustomFormat(format, title, url, jsCode);
+        if (jsErrorDiv) jsErrorDiv.style.display = 'none';
+      } catch (e) {
+        error = e.message;
+        preview = '';
+        if (jsErrorDiv) {
+          jsErrorDiv.textContent = `エラー: ${error}`;
+          jsErrorDiv.style.display = 'block';
+        }
+      }
       previewBox.textContent = preview;
     }
-
-    // 各入力フィールドのイベントリスナー
     formatNameInput.addEventListener('input', updatePreview);
     formatInput.addEventListener('input', updatePreview);
-    searchInput.addEventListener('input', updatePreview);
-    replaceInput.addEventListener('input', updatePreview);
     jsInput.addEventListener('input', updatePreview);
 
-    // カスタム形式を保存する関数
+    // 保存
     function saveCustomFormat(formatData) {
       chrome.storage.sync.get(['customFormats'], function(result) {
         const formats = result.customFormats || [];
-        
-        // 既存の形式を更新するか、新しい形式を追加
         const existingIndex = formats.findIndex(f => f.id === formatData.id);
         if (existingIndex >= 0) {
           formats[existingIndex] = formatData;
         } else {
           formats.push(formatData);
         }
-        
         chrome.storage.sync.set({ customFormats: formats }, function() {
-          // 保存完了後にリストを更新
           loadSavedFormats();
         });
       });
     }
-
-    // 保存ボタン
     if (saveBtn) {
       saveBtn.addEventListener('click', function() {
         const formatName = formatNameInput.value.trim();
         const format = formatInput.value.trim();
-        
         if (!formatName) {
           showStatus('formatNameRequired', 'error');
           return;
         }
-        
         if (!format) {
           showStatus('formatRequired', 'error');
           return;
         }
-
         const formatData = {
           id: editingFormatId || Date.now().toString(),
           name: formatName,
           format: format,
-          searchPattern: searchInput.value.trim(),
-          replacePattern: replaceInput.value.trim(),
           jsCode: jsInput.value.trim()
         };
-
         saveCustomFormat(formatData);
         clearForm();
         showStatus('formatSaved', 'success');
       });
     }
-
-    // 削除ボタン
     if (deleteBtn) {
       deleteBtn.addEventListener('click', function() {
         if (editingFormatId) {
@@ -567,81 +317,47 @@ document.addEventListener('DOMContentLoaded', function() {
           showStatus('noFormatToDelete', 'error');
         }
       });
-      
-      // 初期状態では削除ボタンを非表示
       deleteBtn.style.display = 'none';
     }
-
-    // キャンセルボタン
     if (cancelBtn) {
       cancelBtn.addEventListener('click', function() {
         clearForm();
       });
     }
-
-    // フォームをクリアする関数
     function clearForm() {
       formatNameInput.value = '';
       formatInput.value = '';
-      searchInput.value = '';
-      replaceInput.value = '';
       jsInput.value = '';
       jsErrorDiv.style.display = 'none';
       previewBox.textContent = '';
       editingFormatId = null;
-      
-      // 新規作成モードなので削除ボタンを非表示
-      if (deleteBtn) {
-        deleteBtn.style.display = 'none';
-      }
-      
-      // 初期値を設定
+      if (deleteBtn) deleteBtn.style.display = 'none';
       formatInput.value = '{title} - {url}';
-      searchInput.value = '/ - /g';
-      replaceInput.value = ' | ';
       updatePreview();
     }
-
-    // 初期プレビュー
     clearForm();
-    
-    // 初期化時に保存された形式を読み込み
     loadSavedFormats();
-    
-    // 少し遅延してから再度読み込み（確実に表示されるように）
-    setTimeout(function() {
-      loadSavedFormats();
-    }, 100);
+    setTimeout(function() { loadSavedFormats(); }, 100);
   }
 
   // カスタムフォーマット処理関数
-  function processCustomFormat(format, title, url, searchPattern, replacePattern, jsCode) {
+  function processCustomFormat(format, title, url, jsCode) {
     if (!format) return '';
-
-    // 変数置換
     let result = format
       .replace(/\{title\}/g, title)
       .replace(/\{url\}/g, url)
       .replace(/\{domain\}/g, extractDomain(url))
       .replace(/\{path\}/g, extractPath(url));
-
-    // カスタムJavaScript処理
     if (jsCode && jsCode.trim() !== '') {
       try {
         const runner = new StringReplaceEngine();
         const jsResult = runner.execute(jsCode, { title, url });
         result = result.replace(/\{js\}/g, jsResult);
-        
-        // エラー表示をクリア
         const jsErrorDiv = document.getElementById('js-error');
-        if (jsErrorDiv) {
-          jsErrorDiv.style.display = 'none';
-        }
+        if (jsErrorDiv) jsErrorDiv.style.display = 'none';
       } catch (error) {
         console.error('文字列置換エラー:', error);
         result = result.replace(/\{js\}/g, `[エラー: ${error.message}]`);
-        
-        // エラー表示
         const jsErrorDiv = document.getElementById('js-error');
         if (jsErrorDiv) {
           jsErrorDiv.textContent = `文字列置換エラー: ${error.message}`;
@@ -649,40 +365,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     }
-
-    // 正規表現置換処理
-    if (searchPattern && searchPattern.trim() !== '') {
-      try {
-        // 入力値の安全性チェック
-        if (typeof replacePattern !== 'string') {
-          throw new Error('置換パターンは文字列である必要があります');
-        }
-
-        // 正規表現の構文解析
-        // /pattern/flags 形式を想定
-        const regexMatch = searchPattern.match(/^\/(.+)\/([gimsuy]*)$/);
-        
-        if (regexMatch) {
-          const pattern = regexMatch[1];
-          const flags = regexMatch[2];
-          
-          // 正規表現オブジェクトを作成
-          const regex = new RegExp(pattern, flags);
-          
-          // 文字列置換のみ許可（関数置換は禁止）
-          result = result.replace(regex, replacePattern);
-        } else {
-          // 正規表現形式でない場合は、文字列として扱う
-          const escapedPattern = searchPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const regex = new RegExp(escapedPattern, 'g');
-          result = result.replace(regex, replacePattern);
-        }
-      } catch (error) {
-        console.error('正規表現エラー:', error);
-        result += ' [正規表現エラー]';
-      }
-    }
-
     return result;
   }
 

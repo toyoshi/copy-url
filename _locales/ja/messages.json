@@ -63,22 +63,6 @@
     "message": "フォーマット定義:",
     "description": "Label for format input"
   },
-  "replaceLabel": {
-    "message": "置換ルール（オプション）:",
-    "description": "Label for replace section"
-  },
-  "searchLabel": {
-    "message": "正規表現:",
-    "description": "Label for regex input"
-  },
-  "replaceWithLabel": {
-    "message": "置換:",
-    "description": "Label for replace input"
-  },
-  "regexHelp": {
-    "message": "例: / - /g で「 - 」を全て置換、/^(.+)$/ で行全体をキャプチャ",
-    "description": "Help text for regex usage"
-  },
   "previewLabel": {
     "message": "プレビュー:",
     "description": "Label for preview section"
