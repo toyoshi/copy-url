@@ -123,6 +123,10 @@
     "message": "Format deleted successfully",
     "description": "Success message when format is deleted"
   },
+  "customFormatCopied": {
+    "message": "Custom format copied successfully",
+    "description": "Success message when custom format is copied"
+  },
   "saveButton": {
     "message": "Save",
     "description": "Save button text"
@@ -130,5 +134,17 @@
   "cancelButton": {
     "message": "Cancel",
     "description": "Cancel button text"
+  },
+  "deleteConfirm": {
+    "message": "Are you sure you want to delete this format?",
+    "description": "Delete confirmation message"
+  },
+  "deleteButton": {
+    "message": "Delete",
+    "description": "Delete button text"
+  },
+  "noFormatToDelete": {
+    "message": "No format selected for deletion",
+    "description": "Error message when no format is selected for deletion"
   }
 } 

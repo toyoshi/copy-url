@@ -123,6 +123,10 @@
     "message": "形式を削除しました",
     "description": "Success message when format is deleted"
   },
+  "customFormatCopied": {
+    "message": "カスタム形式でコピーしました",
+    "description": "Success message when custom format is copied"
+  },
   "saveButton": {
     "message": "保存",
     "description": "Save button text"
@@ -130,5 +134,17 @@
   "cancelButton": {
     "message": "キャンセル",
     "description": "Cancel button text"
+  },
+  "deleteConfirm": {
+    "message": "この形式を削除しますか？",
+    "description": "Delete confirmation message"
+  },
+  "deleteButton": {
+    "message": "削除",
+    "description": "Delete button text"
+  },
+  "noFormatToDelete": {
+    "message": "削除する形式が選択されていません",
+    "description": "Error message when no format is selected for deletion"
   }
 } 

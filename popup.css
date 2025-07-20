@@ -50,7 +50,8 @@ h1 {
   transition: all 0.2s ease;
   text-align: left;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
   gap: 4px;
 }
 
@@ -63,6 +64,50 @@ h1 {
 .copy-btn:active {
   transform: translateY(0);
   box-shadow: 0 1px 4px rgba(0, 123, 255, 0.2);
+}
+
+.custom-format-btn {
+  /* HTML形式と同じ色を使用 */
+}
+
+.btn-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.btn-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.edit-btn:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.delete-btn:hover {
+  background-color: rgba(220, 53, 69, 0.1);
 }
 
 .btn-title {
@@ -78,8 +123,8 @@ h1 {
 }
 
 .status {
-  margin-top: 16px;
-  padding: 12px;
+  margin-top: 6px;
+  padding: 2px;
   border-radius: 6px;
   font-size: 13px;
   text-align: center;
@@ -91,6 +136,8 @@ h1 {
 
 .status.show {
   opacity: 1;
+  margin: 16px 0px;
+  padding: 12px;
   animation: fadeIn 0.2s ease-in;
 }
 
@@ -119,9 +166,8 @@ h1 {
 
 /* カスタム形式セクション */
 .custom-section {
-  margin-top: 16px;
-  border-top: 1px solid #e1e5e9;
-  padding-top: 16px;
+  margin-top: 6px;
+  padding-top: 6px;
 }
 
 .custom-toggle {
@@ -309,11 +355,24 @@ h1 {
   border: 1px solid #e1e5e9;
   border-radius: 6px;
   font-size: 11px;
+  transition: background-color 0.2s ease;
+}
+
+.saved-format-item:hover {
+  background: #e9ecef;
 }
 
 .format-info {
   flex: 1;
   min-width: 0;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.format-info:hover {
+  background-color: rgba(0, 123, 255, 0.1);
 }
 
 .format-name {
@@ -414,7 +473,7 @@ h1 {
   justify-content: flex-end;
 }
 
-.save-btn, .cancel-btn {
+.save-btn, .cancel-btn, .delete-btn-form {
   padding: 6px 12px;
   border: 1px solid #e1e5e9;
   border-radius: 4px;
@@ -442,4 +501,15 @@ h1 {
 .cancel-btn:hover {
   background: #f8f9fa;
   border-color: #adb5bd;
+}
+
+.delete-btn-form {
+  background: #dc3545;
+  color: white;
+  border-color: #dc3545;
+}
+
+.delete-btn-form:hover {
+  background: #c82333;
+  border-color: #c82333;
 } 

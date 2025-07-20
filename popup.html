@@ -8,24 +8,21 @@
 </head>
 <body>
   <div class="container">
-    <h1 id="popup-title">Just URL COPY FREE</h1>
-    <p class="app-subtitle" id="app-subtitle" data-i18n="appSubtitle">Copy URLs in multiple formats</p>
     <div class="copy-buttons">
       <button id="copy-title-url" class="copy-btn">
         <span class="btn-title" data-i18n="copyTitleUrl">Title + URL</span>
-        <span class="btn-desc" data-i18n="copyTitleUrlDesc">Page Title - https://example.com/page</span>
       </button>
       
       <button id="copy-markdown" class="copy-btn">
         <span class="btn-title" data-i18n="copyMarkdown">Markdown Format</span>
-        <span class="btn-desc" data-i18n="copyMarkdownDesc">[Page Title](https://example.com/page)</span>
       </button>
       
       <button id="copy-html" class="copy-btn">
         <span class="btn-title" data-i18n="copyHtml">HTML Format</span>
-        <span class="btn-desc" data-i18n="copyHtmlDesc">&lt;a href="..."&gt;Page Title&lt;/a&gt;</span>
       </button>
     </div>
+    
+    <div id="status" class="status"></div>
     
     <!-- カスタム形式セクション -->
     <div class="custom-section">
@@ -68,11 +65,13 @@
           
           <div class="custom-buttons">
             <button id="save-custom" class="save-btn" data-i18n="saveButton">保存</button>
+            <button id="delete-custom" class="delete-btn-form" data-i18n="deleteButton">削除</button>
             <button id="cancel-custom" class="cancel-btn" data-i18n="cancelButton">キャンセル</button>
           </div>
         </div>
         
-        <div class="saved-formats">
+        <!-- 保存された形式セクションは非表示（メインボタンエリアに表示するため） -->
+        <div class="saved-formats" style="display: none;">
           <h4 data-i18n="savedFormatsTitle">保存された形式</h4>
           <div id="saved-formats-list" class="formats-list">
             <!-- 保存された形式がここに動的に追加される -->
@@ -80,8 +79,6 @@
         </div>
       </div>
     </div>
-    
-    <div id="status" class="status"></div>
   </div>
   
   <script src="popup.js"></script>
