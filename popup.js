@@ -6,34 +6,28 @@ document.addEventListener('DOMContentLoaded', function() {
       execute(code, context) {
         try {
           const inputText = context.title || '';
-          
-          // 文字列置換パターンを処理
-          const replacePatterns = [
-            // 正規表現置換: /pattern/replacement/g
-            {
-              pattern: /\/\/([^\/]+)\/([^\/]*)\/([gimsuy]*)/g,
-              handler: (match, pattern, replacement, flags) => {
-                try {
-                  const regex = new RegExp(pattern, flags);
-                  return inputText.replace(regex, replacement);
-                } catch (error) {
-                  return inputText;
-                }
-              }
-            },
-            // 単純な文字列置換: "search" -> "replace"
-            {
-              pattern: /"([^"]+)"\s*->\s*"([^"]*)"/g,
-              handler: (match, search, replacement) => {
-                return inputText.replace(new RegExp(this.escapeRegExp(search), 'g'), replacement);
-              }
-            }
-          ];
-          
-          // 置換パターンを適用
           let result = inputText;
-          for (const replacePattern of replacePatterns) {
-            result = result.replace(replacePattern.pattern, replacePattern.handler);
+          
+          // 正規表現置換: /pattern/replacement/g
+          const regexMatch = code.match(/^\/(.+)\/(.+)\/([gimsuy]*)$/);
+          if (regexMatch) {
+            const pattern = regexMatch[1];
+            const replacement = regexMatch[2];
+            const flags = regexMatch[3];
+            try {
+              const regex = new RegExp(pattern, flags);
+              result = result.replace(regex, replacement);
+            } catch (error) {
+              return inputText;
+            }
+          }
+          
+          // 文字列置換: "search" -> "replace"
+          const stringMatch = code.match(/^"([^"]+)"\s*->\s*"([^"]*)"$/);
+          if (stringMatch) {
+            const search = stringMatch[1];
+            const replacement = stringMatch[2];
+            result = result.replace(new RegExp(this.escapeRegExp(search), 'g'), replacement);
           }
           
           return result;
