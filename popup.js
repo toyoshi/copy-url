@@ -168,6 +168,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // 正規表現置換処理
     if (searchPattern && searchPattern.trim() !== '') {
       try {
+        // 入力値の安全性チェック
+        if (typeof replacePattern !== 'string') {
+          throw new Error('置換パターンは文字列である必要があります');
+        }
+
         // 正規表現の構文解析
         // /pattern/flags 形式を想定
         const regexMatch = searchPattern.match(/^\/(.+)\/([gimsuy]*)$/);
@@ -178,12 +183,14 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // 正規表現オブジェクトを作成
           const regex = new RegExp(pattern, flags);
-          result = result.replace(regex, replacePattern || '');
+          
+          // 文字列置換のみ許可（関数置換は禁止）
+          result = result.replace(regex, replacePattern);
         } else {
           // 正規表現形式でない場合は、文字列として扱う
           const escapedPattern = searchPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           const regex = new RegExp(escapedPattern, 'g');
-          result = result.replace(regex, replacePattern || '');
+          result = result.replace(regex, replacePattern);
         }
       } catch (error) {
         console.error('正規表現エラー:', error);
