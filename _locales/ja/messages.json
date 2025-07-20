@@ -146,5 +146,13 @@
   "noFormatToDelete": {
     "message": "削除する形式が選択されていません",
     "description": "Error message when no format is selected for deletion"
+  },
+  "customJsLabel": {
+    "message": "カスタムJavaScript（オプション）:",
+    "description": "Label for custom JavaScript input"
+  },
+  "jsHelp": {
+    "message": "利用可能な変数: title, url, domain, path, date。フォーマット内で {js} として使用",
+    "description": "Help text for JavaScript usage"
   }
 } 

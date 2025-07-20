@@ -146,5 +146,13 @@
   "noFormatToDelete": {
     "message": "No format selected for deletion",
     "description": "Error message when no format is selected for deletion"
+  },
+  "customJsLabel": {
+    "message": "Custom JavaScript (optional):",
+    "description": "Label for custom JavaScript input"
+  },
+  "jsHelp": {
+    "message": "Available variables: title, url, domain, path, date. Use as {js} in format",
+    "description": "Help text for JavaScript usage"
   }
 } 

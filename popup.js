@@ -2,6 +2,150 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log('DOMContentLoaded event fired');
   
   try {
+    // セキュアなJavaScript実行エンジン
+    class SecureJSRunner {
+      constructor() {
+        // 許可される関数のみを定義
+        this.allowedFunctions = {
+          // 文字列操作
+          substring: String.prototype.substring,
+          replace: String.prototype.replace,
+          toLowerCase: String.prototype.toLowerCase,
+          toUpperCase: String.prototype.toUpperCase,
+          trim: String.prototype.trim,
+          split: String.prototype.split,
+          indexOf: String.prototype.indexOf,
+          lastIndexOf: String.prototype.lastIndexOf,
+          
+          // 配列操作
+          join: Array.prototype.join,
+          slice: Array.prototype.slice,
+          map: Array.prototype.map,
+          filter: Array.prototype.filter,
+          
+          // 数学関数
+          Math: {
+            floor: Math.floor,
+            ceil: Math.ceil,
+            round: Math.round,
+            max: Math.max,
+            min: Math.min,
+            abs: Math.abs,
+            random: Math.random
+          },
+          
+          // 日時関数
+          Date: {
+            now: Date.now,
+            getFullYear: Date.prototype.getFullYear,
+            getMonth: Date.prototype.getMonth,
+            getDate: Date.prototype.getDate,
+            getHours: Date.prototype.getHours,
+            getMinutes: Date.prototype.getMinutes,
+            getSeconds: Date.prototype.getSeconds,
+            getDay: Date.prototype.getDay
+          }
+        };
+        
+        // 禁止する関数・オブジェクト
+        this.forbiddenKeywords = [
+          'eval', 'Function', 'setTimeout', 'setInterval',
+          'fetch', 'XMLHttpRequest', 'fetch',
+          'localStorage', 'sessionStorage', 'indexedDB',
+          'document', 'window', 'location', 'history',
+          'chrome', 'browser', 'navigator', 'alert',
+          'confirm', 'prompt', 'console', 'debugger'
+        ];
+      }
+      
+      // セキュリティチェック
+      validateCode(code) {
+        // 禁止キーワードのチェック
+        for (const keyword of this.forbiddenKeywords) {
+          if (code.includes(keyword)) {
+            throw new Error(`禁止されたキーワード: ${keyword}`);
+          }
+        }
+        
+        // 危険なパターンのチェック
+        const dangerousPatterns = [
+          /eval\s*\(/,
+          /Function\s*\(/,
+          /new\s+Function/,
+          /setTimeout\s*\(/,
+          /setInterval\s*\(/,
+          /fetch\s*\(/,
+          /XMLHttpRequest/,
+          /document\./,
+          /window\./,
+          /chrome\./,
+          /browser\./,
+          /alert\s*\(/,
+          /confirm\s*\(/,
+          /prompt\s*\(/,
+          /console\./,
+          /debugger\s*;/
+        ];
+        
+        for (const pattern of dangerousPatterns) {
+          if (pattern.test(code)) {
+            throw new Error('危険なコードパターンが検出されました');
+          }
+        }
+        
+        return true;
+      }
+      
+      // 安全な実行
+      execute(code, context) {
+        try {
+          this.validateCode(code);
+          
+          // 安全なコンテキストを作成
+          const safeContext = {
+            title: context.title || '',
+            url: context.url || '',
+            domain: this.extractDomain(context.url),
+            path: this.extractPath(context.url),
+            date: new Date(),
+            ...this.allowedFunctions
+          };
+          
+          // 関数として実行
+          const func = new Function('title', 'url', 'domain', 'path', 'date', 'Math', 'Date', code);
+          return func(
+            safeContext.title,
+            safeContext.url,
+            safeContext.domain,
+            safeContext.path,
+            safeContext.date,
+            safeContext.Math,
+            safeContext.Date
+          );
+          
+        } catch (error) {
+          console.error('JavaScript実行エラー:', error);
+          return `[エラー: ${error.message}]`;
+        }
+      }
+      
+      extractDomain(url) {
+        try {
+          return new URL(url).hostname;
+        } catch {
+          return '';
+        }
+      }
+      
+      extractPath(url) {
+        try {
+          return new URL(url).pathname;
+        } catch {
+          return '';
+        }
+      }
+    }
+
     // 国際化対応
     initializeI18n();
   
@@ -110,6 +254,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const formatInput = document.getElementById('custom-format');
     const searchInput = document.getElementById('search-pattern');
     const replaceInput = document.getElementById('replace-pattern');
+    const jsInput = document.getElementById('custom-js');
+    const jsErrorDiv = document.getElementById('js-error');
     const previewBox = document.getElementById('custom-preview');
     const saveBtn = document.getElementById('save-custom');
     const deleteBtn = document.getElementById('delete-custom');
@@ -189,7 +335,8 @@ document.addEventListener('DOMContentLoaded', function() {
               currentTab.title, 
               currentTab.url, 
               format.searchPattern, 
-              format.replacePattern
+              format.replacePattern,
+              format.jsCode
             );
             copyToClipboard(copiedText, 'customFormatCopied');
           });
@@ -207,6 +354,8 @@ document.addEventListener('DOMContentLoaded', function() {
           formatInput.value = format.format;
           searchInput.value = format.searchPattern;
           replaceInput.value = format.replacePattern;
+          jsInput.value = format.jsCode || '';
+          jsErrorDiv.style.display = 'none';
           updatePreview();
           
           // カスタムパネルを開く
@@ -236,7 +385,8 @@ document.addEventListener('DOMContentLoaded', function() {
           currentTab.title, 
           currentTab.url, 
           format.searchPattern, 
-          format.replacePattern
+          format.replacePattern,
+          format.jsCode
         );
         
         item.innerHTML = `
@@ -298,7 +448,8 @@ document.addEventListener('DOMContentLoaded', function() {
             currentTab.title, 
             currentTab.url, 
             format.searchPattern, 
-            format.replacePattern
+            format.replacePattern,
+            format.jsCode
           );
           
           copyToClipboard(copiedText, 'customFormatCopied');
@@ -316,6 +467,8 @@ document.addEventListener('DOMContentLoaded', function() {
         formatInput.value = format.format;
         searchInput.value = format.searchPattern;
         replaceInput.value = format.replacePattern;
+        jsInput.value = format.jsCode || '';
+        jsErrorDiv.style.display = 'none';
         updatePreview();
         
         // カスタムパネルを開く
@@ -355,7 +508,8 @@ document.addEventListener('DOMContentLoaded', function() {
           name: formatName,
           format: formatText,
           searchPattern: searchInput.value.trim(),
-          replacePattern: replaceInput.value.trim()
+          replacePattern: replaceInput.value.trim(),
+          jsCode: jsInput.value.trim()
         };
 
         saveCustomFormat(updatedFormatData);
@@ -427,7 +581,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const format = formatInput.value;
       const searchPattern = searchInput.value;
       const replacePattern = replaceInput.value;
-      const preview = processCustomFormat(format, title, url, searchPattern, replacePattern);
+      const jsCode = jsInput.value;
+      const preview = processCustomFormat(format, title, url, searchPattern, replacePattern, jsCode);
       previewBox.textContent = preview;
     }
 
@@ -436,6 +591,7 @@ document.addEventListener('DOMContentLoaded', function() {
     formatInput.addEventListener('input', updatePreview);
     searchInput.addEventListener('input', updatePreview);
     replaceInput.addEventListener('input', updatePreview);
+    jsInput.addEventListener('input', updatePreview);
 
     // カスタム形式を保存する関数
     function saveCustomFormat(formatData) {
@@ -488,7 +644,8 @@ document.addEventListener('DOMContentLoaded', function() {
           name: formatName,
           format: format,
           searchPattern: searchInput.value.trim(),
-          replacePattern: replaceInput.value.trim()
+          replacePattern: replaceInput.value.trim(),
+          jsCode: jsInput.value.trim()
         };
 
         console.log('Format data to save:', formatData);
@@ -536,6 +693,8 @@ document.addEventListener('DOMContentLoaded', function() {
       formatInput.value = '';
       searchInput.value = '';
       replaceInput.value = '';
+      jsInput.value = '';
+      jsErrorDiv.style.display = 'none';
       previewBox.textContent = '';
       editingFormatId = null;
       
@@ -566,13 +725,40 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // カスタムフォーマット処理関数
-  function processCustomFormat(format, title, url, searchPattern, replacePattern) {
+  function processCustomFormat(format, title, url, searchPattern, replacePattern, jsCode) {
     if (!format) return '';
 
     // 変数置換
     let result = format
       .replace(/\{title\}/g, title)
-      .replace(/\{url\}/g, url);
+      .replace(/\{url\}/g, url)
+      .replace(/\{domain\}/g, extractDomain(url))
+      .replace(/\{path\}/g, extractPath(url));
+
+    // カスタムJavaScript処理
+    if (jsCode && jsCode.trim() !== '') {
+      try {
+        const runner = new SecureJSRunner();
+        const jsResult = runner.execute(jsCode, { title, url });
+        result = result.replace(/\{js\}/g, jsResult);
+        
+        // エラー表示をクリア
+        const jsErrorDiv = document.getElementById('js-error');
+        if (jsErrorDiv) {
+          jsErrorDiv.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('JavaScript処理エラー:', error);
+        result = result.replace(/\{js\}/g, `[JSエラー: ${error.message}]`);
+        
+        // エラー表示
+        const jsErrorDiv = document.getElementById('js-error');
+        if (jsErrorDiv) {
+          jsErrorDiv.textContent = `JavaScriptエラー: ${error.message}`;
+          jsErrorDiv.style.display = 'block';
+        }
+      }
+    }
 
     // 正規表現置換処理
     if (searchPattern && searchPattern.trim() !== '') {
@@ -608,6 +794,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     return result;
+  }
+
+  // ドメイン抽出関数
+  function extractDomain(url) {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return '';
+    }
+  }
+
+  // パス抽出関数
+  function extractPath(url) {
+    try {
+      return new URL(url).pathname;
+    } catch {
+      return '';
+    }
   }
   
   } catch (error) {

@@ -58,6 +58,15 @@
             </div>
           </div>
           
+          <div class="js-editor-section">
+            <label for="custom-js" data-i18n="customJsLabel">カスタムJavaScript（オプション）:</label>
+            <textarea id="custom-js" placeholder="// 例: title.length > 50 ? title.substring(0, 50) + '...' : title" rows="4"></textarea>
+            <div class="js-help">
+              <small data-i18n="jsHelp">利用可能な変数: title, url, domain, path, date。フォーマット内で {js} として使用</small>
+            </div>
+            <div id="js-error" class="js-error" style="display: none;"></div>
+          </div>
+          
           <div class="preview-section">
             <label data-i18n="previewLabel">プレビュー:</label>
             <div id="custom-preview" class="preview-box"></div>
