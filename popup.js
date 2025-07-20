@@ -351,18 +351,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (jsCode && jsCode.trim() !== '') {
       try {
         const runner = new StringReplaceEngine();
-        const jsResult = runner.execute(jsCode, { title, url });
-        result = result.replace(/\{js\}/g, jsResult);
-        const jsErrorDiv = document.getElementById('js-error');
-        if (jsErrorDiv) jsErrorDiv.style.display = 'none';
+        result = runner.execute(jsCode, { title: result, url: result });
       } catch (error) {
-        console.error('文字列置換エラー:', error);
-        result = result.replace(/\{js\}/g, `[エラー: ${error.message}]`);
-        const jsErrorDiv = document.getElementById('js-error');
-        if (jsErrorDiv) {
-          jsErrorDiv.textContent = `文字列置換エラー: ${error.message}`;
-          jsErrorDiv.style.display = 'block';
-        }
+        throw error;
       }
     }
     return result;
