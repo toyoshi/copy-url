@@ -152,7 +152,7 @@
     "description": "Label for custom JavaScript input"
   },
   "jsHelp": {
-    "message": "Available variables: title, url, domain, path, date. Use as {js} in format. Limited syntax only",
+    "message": "Available variables: title, url, domain, path. Regex replace: /pattern/replacement/g, String replace: \"search\" -> \"replace\"",
     "description": "Help text for JavaScript usage"
   }
 } 
