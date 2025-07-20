@@ -6,7 +6,8 @@
   "default_locale": "en",
   "permissions": [
     "activeTab",
-    "clipboardWrite"
+    "clipboardWrite",
+    "storage"
   ],
   "action": {
     "default_popup": "popup.html",

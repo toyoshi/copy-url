@@ -106,12 +106,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleBtn = document.getElementById('toggle-custom');
     const customPanel = document.getElementById('custom-panel');
     const toggleIcon = toggleBtn.querySelector('.toggle-icon');
+    const formatNameInput = document.getElementById('format-name');
     const formatInput = document.getElementById('custom-format');
     const searchInput = document.getElementById('search-pattern');
     const replaceInput = document.getElementById('replace-pattern');
     const previewBox = document.getElementById('custom-preview');
     const saveBtn = document.getElementById('save-custom');
     const cancelBtn = document.getElementById('cancel-custom');
+    const savedFormatsList = document.getElementById('saved-formats-list');
+
+    let editingFormatId = null;
+
+    // 保存された形式を読み込み
+    loadSavedFormats();
 
     // トグルボタンのクリックイベント
     toggleBtn.addEventListener('click', function() {
@@ -129,31 +136,63 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 各入力フィールドのイベントリスナー
+    formatNameInput.addEventListener('input', updatePreview);
     formatInput.addEventListener('input', updatePreview);
     searchInput.addEventListener('input', updatePreview);
     replaceInput.addEventListener('input', updatePreview);
 
-    // 保存ボタン（現在は動作確認のみ）
+    // 保存ボタン
     saveBtn.addEventListener('click', function() {
-      console.log('保存機能は未実装です');
-      showStatus('Custom format saved (demo)', 'success');
+      const formatName = formatNameInput.value.trim();
+      const format = formatInput.value.trim();
+      
+      if (!formatName) {
+        showStatus('formatNameRequired', 'error');
+        return;
+      }
+      
+      if (!format) {
+        showStatus('formatRequired', 'error');
+        return;
+      }
+
+      const formatData = {
+        id: editingFormatId || Date.now().toString(),
+        name: formatName,
+        format: format,
+        searchPattern: searchInput.value.trim(),
+        replacePattern: replaceInput.value.trim()
+      };
+
+      saveCustomFormat(formatData);
+      clearForm();
+      loadSavedFormats();
+      showStatus('formatSaved', 'success');
     });
 
     // キャンセルボタン
     cancelBtn.addEventListener('click', function() {
+      clearForm();
+    });
+
+    // フォームをクリアする関数
+    function clearForm() {
+      formatNameInput.value = '';
       formatInput.value = '';
       searchInput.value = '';
       replaceInput.value = '';
       previewBox.textContent = '';
-      customPanel.classList.add('hidden');
-      toggleIcon.classList.remove('rotated');
-    });
+      editingFormatId = null;
+      
+      // 初期値を設定
+      formatInput.value = '{title} - {url}';
+      searchInput.value = '/ - /g';
+      replaceInput.value = ' | ';
+      updatePreview();
+    }
 
     // 初期プレビュー
-    formatInput.value = '{title} - {url}';
-    searchInput.value = '/ - /g';
-    replaceInput.value = ' | ';
-    updatePreview();
+    clearForm();
   }
 
   // カスタムフォーマット処理関数
@@ -199,5 +238,142 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     return result;
+  }
+
+  // カスタム形式を保存する関数
+  function saveCustomFormat(formatData) {
+    chrome.storage.sync.get(['customFormats'], function(result) {
+      const formats = result.customFormats || [];
+      
+      // 既存の形式を更新するか、新しい形式を追加
+      const existingIndex = formats.findIndex(f => f.id === formatData.id);
+      if (existingIndex >= 0) {
+        formats[existingIndex] = formatData;
+      } else {
+        formats.push(formatData);
+      }
+      
+      chrome.storage.sync.set({ customFormats: formats });
+    });
+  }
+
+  // 保存された形式を読み込む関数
+  function loadSavedFormats() {
+    chrome.storage.sync.get(['customFormats'], function(result) {
+      const formats = result.customFormats || [];
+      const savedFormatsList = document.getElementById('saved-formats-list');
+      
+      if (formats.length === 0) {
+        savedFormatsList.innerHTML = '<div class="no-formats">保存された形式はありません</div>';
+        return;
+      }
+      
+      savedFormatsList.innerHTML = '';
+      
+      formats.forEach(format => {
+        const formatItem = createFormatItem(format);
+        savedFormatsList.appendChild(formatItem);
+      });
+    });
+  }
+
+  // 形式アイテムを作成する関数
+  function createFormatItem(format) {
+    const item = document.createElement('div');
+    item.className = 'saved-format-item';
+    
+    // 現在のタブ情報を取得してプレビューを生成
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      const currentTab = tabs[0];
+      const preview = processCustomFormat(
+        format.format, 
+        currentTab.title, 
+        currentTab.url, 
+        format.searchPattern, 
+        format.replacePattern
+      );
+      
+      item.innerHTML = `
+        <div class="format-info">
+          <div class="format-name">${format.name}</div>
+          <div class="format-preview">${preview}</div>
+        </div>
+        <div class="format-actions">
+          <a href="#" class="edit-link" data-i18n="editLink">編集</a>
+          <div class="edit-actions" style="display: none;">
+            <a href="#" class="edit-action save-action" data-i18n="saveAction">保存</a>
+            <a href="#" class="edit-action cancel-action" data-i18n="cancelAction">キャンセル</a>
+            <a href="#" class="edit-action delete-action delete" data-i18n="deleteAction">削除</a>
+          </div>
+        </div>
+      `;
+      
+      // 国際化を適用
+      const editLink = item.querySelector('.edit-link');
+      const saveAction = item.querySelector('.save-action');
+      const cancelAction = item.querySelector('.cancel-action');
+      const deleteAction = item.querySelector('.delete-action');
+      
+      editLink.textContent = chrome.i18n.getMessage('editLink') || '編集';
+      saveAction.textContent = chrome.i18n.getMessage('saveAction') || '保存';
+      cancelAction.textContent = chrome.i18n.getMessage('cancelAction') || 'キャンセル';
+      deleteAction.textContent = chrome.i18n.getMessage('deleteAction') || '削除';
+      
+      // イベントリスナーを追加
+      setupFormatItemEvents(item, format);
+    });
+    
+    return item;
+  }
+
+  // 形式アイテムのイベントを設定する関数
+  function setupFormatItemEvents(item, format) {
+    const editLink = item.querySelector('.edit-link');
+    const editActions = item.querySelector('.edit-actions');
+    const saveAction = item.querySelector('.save-action');
+    const cancelAction = item.querySelector('.cancel-action');
+    const deleteAction = item.querySelector('.delete-action');
+    
+    // 編集リンクのクリック
+    editLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      editLink.style.display = 'none';
+      editActions.style.display = 'flex';
+    });
+    
+    // 保存アクション
+    saveAction.addEventListener('click', function(e) {
+      e.preventDefault();
+      // 編集モードを終了
+      editLink.style.display = 'inline';
+      editActions.style.display = 'none';
+    });
+    
+    // キャンセルアクション
+    cancelAction.addEventListener('click', function(e) {
+      e.preventDefault();
+      // 編集モードを終了
+      editLink.style.display = 'inline';
+      editActions.style.display = 'none';
+    });
+    
+    // 削除アクション
+    deleteAction.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (confirm('この形式を削除しますか？')) {
+        deleteCustomFormat(format.id);
+        loadSavedFormats();
+        showStatus('formatDeleted', 'success');
+      }
+    });
+  }
+
+  // カスタム形式を削除する関数
+  function deleteCustomFormat(formatId) {
+    chrome.storage.sync.get(['customFormats'], function(result) {
+      const formats = result.customFormats || [];
+      const filteredFormats = formats.filter(f => f.id !== formatId);
+      chrome.storage.sync.set({ customFormats: filteredFormats });
+    });
   }
 }); 

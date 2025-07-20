@@ -36,6 +36,11 @@
       
       <div id="custom-panel" class="custom-panel hidden">
         <div class="custom-form">
+          <div class="format-name-section">
+            <label for="format-name" data-i18n="formatNameLabel">形式名:</label>
+            <input type="text" id="format-name" placeholder="カスタム形式1" maxlength="30">
+          </div>
+          
           <label for="custom-format" data-i18n="formatLabel">フォーマット定義:</label>
           <textarea id="custom-format" placeholder="{title} - {url}" rows="3"></textarea>
           
@@ -64,6 +69,13 @@
           <div class="custom-buttons">
             <button id="save-custom" class="save-btn" data-i18n="saveButton">保存</button>
             <button id="cancel-custom" class="cancel-btn" data-i18n="cancelButton">キャンセル</button>
+          </div>
+        </div>
+        
+        <div class="saved-formats">
+          <h4 data-i18n="savedFormatsTitle">保存された形式</h4>
+          <div id="saved-formats-list" class="formats-list">
+            <!-- 保存された形式がここに動的に追加される -->
           </div>
         </div>
       </div>

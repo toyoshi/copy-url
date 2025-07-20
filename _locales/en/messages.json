@@ -83,6 +83,46 @@
     "message": "Preview:",
     "description": "Label for preview section"
   },
+  "savedFormatsTitle": {
+    "message": "Saved Formats",
+    "description": "Title for saved formats section"
+  },
+  "editLink": {
+    "message": "Edit",
+    "description": "Edit link text"
+  },
+  "saveAction": {
+    "message": "Save",
+    "description": "Save action text"
+  },
+  "cancelAction": {
+    "message": "Cancel",
+    "description": "Cancel action text"
+  },
+  "deleteAction": {
+    "message": "Delete",
+    "description": "Delete action text"
+  },
+  "formatNameLabel": {
+    "message": "Format Name:",
+    "description": "Label for format name input"
+  },
+  "formatNameRequired": {
+    "message": "Format name is required",
+    "description": "Error message when format name is missing"
+  },
+  "formatRequired": {
+    "message": "Format definition is required",
+    "description": "Error message when format definition is missing"
+  },
+  "formatSaved": {
+    "message": "Format saved successfully",
+    "description": "Success message when format is saved"
+  },
+  "formatDeleted": {
+    "message": "Format deleted successfully",
+    "description": "Success message when format is deleted"
+  },
   "saveButton": {
     "message": "Save",
     "description": "Save button text"

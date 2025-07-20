@@ -83,6 +83,46 @@
     "message": "プレビュー:",
     "description": "Label for preview section"
   },
+  "savedFormatsTitle": {
+    "message": "保存された形式",
+    "description": "Title for saved formats section"
+  },
+  "editLink": {
+    "message": "編集",
+    "description": "Edit link text"
+  },
+  "saveAction": {
+    "message": "保存",
+    "description": "Save action text"
+  },
+  "cancelAction": {
+    "message": "キャンセル",
+    "description": "Cancel action text"
+  },
+  "deleteAction": {
+    "message": "削除",
+    "description": "Delete action text"
+  },
+  "formatNameLabel": {
+    "message": "形式名:",
+    "description": "Label for format name input"
+  },
+  "formatNameRequired": {
+    "message": "形式名を入力してください",
+    "description": "Error message when format name is missing"
+  },
+  "formatRequired": {
+    "message": "フォーマット定義を入力してください",
+    "description": "Error message when format definition is missing"
+  },
+  "formatSaved": {
+    "message": "形式を保存しました",
+    "description": "Success message when format is saved"
+  },
+  "formatDeleted": {
+    "message": "形式を削除しました",
+    "description": "Success message when format is deleted"
+  },
   "saveButton": {
     "message": "保存",
     "description": "Save button text"
