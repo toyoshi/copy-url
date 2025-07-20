@@ -45,9 +45,9 @@
           
           <div class="js-editor-section">
             <label for="custom-js" data-i18n="customJsLabel">カスタムJavaScript（オプション）:</label>
-            <textarea id="custom-js" placeholder="// 例: / - /g で「 - 」を全て置換、&quot;search&quot; -> &quot;replace&quot; で文字列置換" rows="4"></textarea>
+            <textarea id="custom-js" placeholder="// 例: / - /g で「 - 」を全て置換、&quot;search&quot; -> &quot;replace&quot; で文字列置換&#10;// 複数ルールは改行で区切る&#10;// /(Startup)/g で $1 でキャプチャグループを参照" rows="4"></textarea>
             <div class="js-help">
-              <small data-i18n="jsHelp">利用可能な変数: title, url, domain, path。正規表現置換: /pattern/replacement/g、文字列置換: "search" -> "replace"</small>
+              <small data-i18n="jsHelp">利用可能な変数: title, url, domain, path。正規表現置換: /pattern/replacement/g、文字列置換: "search" -> "replace"。複数ルールは改行で区切る。$1, $2などでキャプチャグループを参照可能。</small>
             </div>
             <div id="js-error" class="js-error" style="display: none;"></div>
           </div>

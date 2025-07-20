@@ -136,7 +136,7 @@
     "description": "Label for custom JavaScript input"
   },
   "jsHelp": {
-    "message": "Available variables: title, url, domain, path. Regex replace: /pattern/replacement/g, String replace: \"search\" -> \"replace\"",
+    "message": "Available variables: title, url, domain, path. Regex replace: /pattern/replacement/g, String replace: \"search\" -> \"replace\". Multiple rules separated by newlines. Use $1, $2, etc. to reference capture groups.",
     "description": "Help text for JavaScript usage"
   }
 } 

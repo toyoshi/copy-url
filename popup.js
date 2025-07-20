@@ -8,26 +8,34 @@ document.addEventListener('DOMContentLoaded', function() {
           const inputText = context.title || '';
           let result = inputText;
           
-          // 正規表現置換: /pattern/replacement/g
-          const regexMatch = code.match(/^\/(.+)\/(.+)\/([gimsuy]*)$/);
-          if (regexMatch) {
-            const pattern = regexMatch[1];
-            const replacement = regexMatch[2];
-            const flags = regexMatch[3];
-            try {
-              const regex = new RegExp(pattern, flags);
-              result = result.replace(regex, replacement);
-            } catch (error) {
-              return inputText;
-            }
-          }
+          // 改行で区切られた複数のルールを処理
+          const rules = code.split('\n').filter(rule => rule.trim() !== '');
           
-          // 文字列置換: "search" -> "replace"
-          const stringMatch = code.match(/^"([^"]+)"\s*->\s*"([^"]*)"$/);
-          if (stringMatch) {
-            const search = stringMatch[1];
-            const replacement = stringMatch[2];
-            result = result.replace(new RegExp(this.escapeRegExp(search), 'g'), replacement);
+          for (const rule of rules) {
+            const trimmedRule = rule.trim();
+            
+            // 正規表現置換: /pattern/replacement/g
+            const regexMatch = trimmedRule.match(/^\/(.+)\/(.+)\/([gimsuy]*)$/);
+            if (regexMatch) {
+              const pattern = regexMatch[1];
+              const replacement = regexMatch[2];
+              const flags = regexMatch[3];
+              try {
+                const regex = new RegExp(pattern, flags);
+                result = result.replace(regex, replacement);
+              } catch (error) {
+                // エラーが発生しても処理を続行
+                continue;
+              }
+            }
+            
+            // 文字列置換: "search" -> "replace"
+            const stringMatch = trimmedRule.match(/^"([^"]+)"\s*->\s*"([^"]*)"$/);
+            if (stringMatch) {
+              const search = stringMatch[1];
+              const replacement = stringMatch[2];
+              result = result.replace(new RegExp(this.escapeRegExp(search), 'g'), replacement);
+            }
           }
           
           return result;
