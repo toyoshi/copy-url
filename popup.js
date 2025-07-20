@@ -36,13 +36,17 @@ document.addEventListener('DOMContentLoaded', function() {
   function copyToClipboard(text, messageKey) {
     navigator.clipboard.writeText(text).then(function() {
       showStatus(messageKey, 'success');
-      // 1秒後にポップアップを閉じる
+      // 2秒後にポップアップを閉じる（通知を十分に表示するため）
       setTimeout(function() {
         window.close();
-      }, 1000);
+      }, 2000);
     }).catch(function(err) {
       console.error('Copy failed:', err);
       showStatus('copyError', 'error');
+      // エラーの場合は3秒後に閉じる
+      setTimeout(function() {
+        window.close();
+      }, 3000);
     });
   }
 
@@ -50,7 +54,12 @@ document.addEventListener('DOMContentLoaded', function() {
   function showStatus(messageKey, type) {
     const message = chrome.i18n.getMessage(messageKey);
     statusDiv.textContent = message;
-    statusDiv.className = `status ${type} show`;
+    statusDiv.className = `status ${type}`;
+    
+    // 強制的に再描画してからshowクラスを追加
+    setTimeout(function() {
+      statusDiv.className = `status ${type} show`;
+    }, 10);
   }
 
   // 国際化初期化関数
