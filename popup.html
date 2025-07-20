@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Copy URL</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Copy URL</h1>
+    <div class="copy-buttons">
+      <button id="copy-title-url" class="copy-btn">
+        <span class="btn-title">タイトル + URL</span>
+        <span class="btn-desc">ページタイトル - https://example.com/page</span>
+      </button>
+      
+      <button id="copy-markdown" class="copy-btn">
+        <span class="btn-title">Markdown形式</span>
+        <span class="btn-desc">[ページタイトル](https://example.com/page)</span>
+      </button>
+      
+      <button id="copy-html" class="copy-btn">
+        <span class="btn-title">HTML形式</span>
+        <span class="btn-desc">&lt;a href="..."&gt;ページタイトル&lt;/a&gt;</span>
+      </button>
+    </div>
+    
+    <div id="status" class="status"></div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html> 
