@@ -54,5 +54,25 @@
   "copyError": {
     "message": "コピーに失敗しました",
     "description": "Error message when copy fails"
+  },
+  "customFormat": {
+    "message": "独自形式を定義する",
+    "description": "Custom format toggle button"
+  },
+  "formatLabel": {
+    "message": "フォーマット定義:",
+    "description": "Label for format input"
+  },
+  "previewLabel": {
+    "message": "プレビュー:",
+    "description": "Label for preview section"
+  },
+  "saveButton": {
+    "message": "保存",
+    "description": "Save button text"
+  },
+  "cancelButton": {
+    "message": "キャンセル",
+    "description": "Cancel button text"
   }
 } 

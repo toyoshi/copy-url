@@ -27,6 +27,31 @@
       </button>
     </div>
     
+    <!-- カスタム形式セクション -->
+    <div class="custom-section">
+      <button id="toggle-custom" class="custom-toggle">
+        <span data-i18n="customFormat">独自形式を定義する</span>
+        <span class="toggle-icon">▼</span>
+      </button>
+      
+      <div id="custom-panel" class="custom-panel hidden">
+        <div class="custom-form">
+          <label for="custom-format" data-i18n="formatLabel">フォーマット定義:</label>
+          <textarea id="custom-format" placeholder="{title} - {url} → s/ - / | /g" rows="3"></textarea>
+          
+          <div class="preview-section">
+            <label data-i18n="previewLabel">プレビュー:</label>
+            <div id="custom-preview" class="preview-box"></div>
+          </div>
+          
+          <div class="custom-buttons">
+            <button id="save-custom" class="save-btn" data-i18n="saveButton">保存</button>
+            <button id="cancel-custom" class="cancel-btn" data-i18n="cancelButton">キャンセル</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <div id="status" class="status"></div>
   </div>
   

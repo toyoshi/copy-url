@@ -54,5 +54,25 @@
   "copyError": {
     "message": "Failed to copy",
     "description": "Error message when copy fails"
+  },
+  "customFormat": {
+    "message": "Define custom format",
+    "description": "Custom format toggle button"
+  },
+  "formatLabel": {
+    "message": "Format definition:",
+    "description": "Label for format input"
+  },
+  "previewLabel": {
+    "message": "Preview:",
+    "description": "Label for preview section"
+  },
+  "saveButton": {
+    "message": "Save",
+    "description": "Save button text"
+  },
+  "cancelButton": {
+    "message": "Cancel",
+    "description": "Cancel button text"
   }
 } 

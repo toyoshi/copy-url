@@ -115,4 +115,146 @@ h1 {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* カスタム形式セクション */
+.custom-section {
+  margin-top: 16px;
+  border-top: 1px solid #e1e5e9;
+  padding-top: 16px;
+}
+
+.custom-toggle {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  width: 100%;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.custom-toggle:hover {
+  color: #0056b3;
+}
+
+.toggle-icon {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.toggle-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.custom-panel {
+  background: #f8f9fa;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+  animation: slideDown 0.3s ease;
+}
+
+.custom-panel.hidden {
+  display: none;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 300px;
+  }
+}
+
+.custom-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.custom-form label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+#custom-format {
+  width: 100%;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  resize: vertical;
+  min-height: 60px;
+}
+
+#custom-format:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preview-box {
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  min-height: 40px;
+  word-break: break-all;
+  color: #6c757d;
+}
+
+.custom-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.save-btn, .cancel-btn {
+  padding: 6px 12px;
+  border: 1px solid #e1e5e9;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-btn {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.save-btn:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+.cancel-btn {
+  background: white;
+  color: #6c757d;
+}
+
+.cancel-btn:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
 } 

@@ -30,6 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const text = `<a href="${url}">${title}</a>`;
       copyToClipboard(text, 'copySuccessHtml');
     });
+
+    // カスタム形式機能の初期化
+    initializeCustomFormat(url, title);
   });
 
   // クリップボードにコピーする関数
@@ -96,5 +99,89 @@ document.addEventListener('DOMContentLoaded', function() {
         element.textContent = message;
       }
     });
+  }
+
+  // カスタム形式機能の初期化
+  function initializeCustomFormat(url, title) {
+    const toggleBtn = document.getElementById('toggle-custom');
+    const customPanel = document.getElementById('custom-panel');
+    const toggleIcon = toggleBtn.querySelector('.toggle-icon');
+    const formatInput = document.getElementById('custom-format');
+    const previewBox = document.getElementById('custom-preview');
+    const saveBtn = document.getElementById('save-custom');
+    const cancelBtn = document.getElementById('cancel-custom');
+
+    // トグルボタンのクリックイベント
+    toggleBtn.addEventListener('click', function() {
+      customPanel.classList.toggle('hidden');
+      toggleIcon.classList.toggle('rotated');
+    });
+
+    // フォーマット入力のリアルタイムプレビュー
+    formatInput.addEventListener('input', function() {
+      const format = formatInput.value;
+      const preview = processCustomFormat(format, title, url);
+      previewBox.textContent = preview;
+    });
+
+    // 保存ボタン（現在は動作確認のみ）
+    saveBtn.addEventListener('click', function() {
+      console.log('保存機能は未実装です');
+      showStatus('Custom format saved (demo)', 'success');
+    });
+
+    // キャンセルボタン
+    cancelBtn.addEventListener('click', function() {
+      formatInput.value = '';
+      previewBox.textContent = '';
+      customPanel.classList.add('hidden');
+      toggleIcon.classList.remove('rotated');
+    });
+
+    // 初期プレビュー
+    formatInput.value = '{title} - {url}';
+    previewBox.textContent = processCustomFormat('{title} - {url}', title, url);
+  }
+
+  // カスタムフォーマット処理関数
+  function processCustomFormat(format, title, url) {
+    if (!format) return '';
+
+    // 変数置換
+    let result = format
+      .replace(/\{title\}/g, title)
+      .replace(/\{url\}/g, url);
+
+    // 正規表現置換（→以降の部分）
+    const regexMatch = result.match(/→\s*(.+)$/);
+    if (regexMatch) {
+      const regexPart = regexMatch[1].trim();
+      const textBeforeRegex = result.substring(0, result.indexOf('→')).trim();
+      
+      try {
+        // 正規表現の構文解析（簡易版）
+        // s/pattern/replacement/g 形式を想定
+        const regexPattern = /^s\/(.+)\/(.+)\/([gimsuy]*)$/;
+        const match = regexPart.match(regexPattern);
+        
+        if (match) {
+          const pattern = match[1];
+          const replacement = match[2];
+          const flags = match[3];
+          
+          // エスケープされたスラッシュを処理
+          const cleanPattern = pattern.replace(/\\\//g, '/');
+          const cleanReplacement = replacement.replace(/\\\//g, '/');
+          
+          const regex = new RegExp(cleanPattern, flags);
+          result = textBeforeRegex.replace(regex, cleanReplacement);
+        }
+      } catch (error) {
+        console.error('正規表現エラー:', error);
+        result = textBeforeRegex + ' [正規表現エラー]';
+      }
+    }
+
+    return result;
   }
 }); 
