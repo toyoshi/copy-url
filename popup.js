@@ -1,164 +1,61 @@
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOMContentLoaded event fired');
-  
   try {
-    // セキュアなJavaScript実行エンジン
-    class SecureJSRunner {
-      constructor() {
-        // 許可される関数のみを定義
-        this.allowedFunctions = {
-          // 文字列操作
-          substring: String.prototype.substring,
-          replace: String.prototype.replace,
-          toLowerCase: String.prototype.toLowerCase,
-          toUpperCase: String.prototype.toUpperCase,
-          trim: String.prototype.trim,
-          split: String.prototype.split,
-          indexOf: String.prototype.indexOf,
-          lastIndexOf: String.prototype.lastIndexOf,
-          
-          // 配列操作
-          join: Array.prototype.join,
-          slice: Array.prototype.slice,
-          map: Array.prototype.map,
-          filter: Array.prototype.filter,
-          
-          // 数学関数
-          Math: {
-            floor: Math.floor,
-            ceil: Math.ceil,
-            round: Math.round,
-            max: Math.max,
-            min: Math.min,
-            abs: Math.abs,
-            random: Math.random
-          },
-          
-          // 日時関数
-          Date: {
-            now: Date.now,
-            getFullYear: Date.prototype.getFullYear,
-            getMonth: Date.prototype.getMonth,
-            getDate: Date.prototype.getDate,
-            getHours: Date.prototype.getHours,
-            getMinutes: Date.prototype.getMinutes,
-            getSeconds: Date.prototype.getSeconds,
-            getDay: Date.prototype.getDay
-          }
-        };
-        
-        // 禁止する関数・オブジェクト
-        this.forbiddenKeywords = [
-          'eval', 'Function', 'setTimeout', 'setInterval',
-          'fetch', 'XMLHttpRequest', 'fetch',
-          'localStorage', 'sessionStorage', 'indexedDB',
-          'document', 'window', 'location', 'history',
-          'chrome', 'browser', 'navigator', 'alert',
-          'confirm', 'prompt', 'console', 'debugger'
-        ];
-      }
-      
-      // セキュリティチェック
-      validateCode(code) {
-        // 禁止キーワードのチェック
-        for (const keyword of this.forbiddenKeywords) {
-          if (code.includes(keyword)) {
-            throw new Error(`禁止されたキーワード: ${keyword}`);
-          }
-        }
-        
-        // 危険なパターンのチェック
-        const dangerousPatterns = [
-          /eval\s*\(/,
-          /Function\s*\(/,
-          /new\s+Function/,
-          /setTimeout\s*\(/,
-          /setInterval\s*\(/,
-          /fetch\s*\(/,
-          /XMLHttpRequest/,
-          /document\./,
-          /window\./,
-          /chrome\./,
-          /browser\./,
-          /alert\s*\(/,
-          /confirm\s*\(/,
-          /prompt\s*\(/,
-          /console\./,
-          /debugger\s*;/
-        ];
-        
-        for (const pattern of dangerousPatterns) {
-          if (pattern.test(code)) {
-            throw new Error('危険なコードパターンが検出されました');
-          }
-        }
-        
-        return true;
-      }
-      
-      // 安全な実行
+    // シンプルな文字列置換エンジン
+    class StringReplaceEngine {
+      // 文字列置換の実行
       execute(code, context) {
         try {
-          this.validateCode(code);
+          const title = context.title || '';
+          const url = context.url || '';
+          const domain = this.extractDomain(context.url);
+          const path = this.extractPath(context.url);
           
-          // 文字列置換のみ対応
-          return this.executeStringReplace(code, context);
+          // 変数置換
+          let result = code
+            .replace(/\{title\}/g, title)
+            .replace(/\{url\}/g, url)
+            .replace(/\{domain\}/g, domain)
+            .replace(/\{path\}/g, path);
           
+          // 文字列置換パターンを処理
+          const replacePatterns = [
+            // 正規表現置換: /pattern/replacement/g
+            {
+              pattern: /\/\/([^\/]+)\/([^\/]*)\/([gimsuy]*)/g,
+              handler: (match, pattern, replacement, flags) => {
+                try {
+                  const regex = new RegExp(pattern, flags);
+                  return result.replace(regex, replacement);
+                } catch (error) {
+                  return result;
+                }
+              }
+            },
+            // 単純な文字列置換: "search" -> "replace"
+            {
+              pattern: /"([^"]+)"\s*->\s*"([^"]*)"/g,
+              handler: (match, search, replacement) => {
+                return result.replace(new RegExp(this.escapeRegExp(search), 'g'), replacement);
+              }
+            }
+          ];
+          
+          // 置換パターンを適用
+          for (const replacePattern of replacePatterns) {
+            result = result.replace(replacePattern.pattern, replacePattern.handler);
+          }
+          
+          return result;
         } catch (error) {
-          console.error('JavaScript実行エラー:', error);
+          console.error('文字列置換エラー:', error);
           return `[エラー: ${error.message}]`;
         }
       }
       
-             // 文字列置換の実行
-       executeStringReplace(code, context) {
-         const title = context.title || '';
-         const url = context.url || '';
-         const domain = this.extractDomain(context.url);
-         const path = this.extractPath(context.url);
-         
-         // 変数置換
-         let result = code
-           .replace(/\{title\}/g, title)
-           .replace(/\{url\}/g, url)
-           .replace(/\{domain\}/g, domain)
-           .replace(/\{path\}/g, path);
-         
-         // 文字列置換パターンを処理
-         const replacePatterns = [
-           // 正規表現置換: /pattern/replacement/g
-           {
-             pattern: /\/\/([^\/]+)\/([^\/]*)\/([gimsuy]*)/g,
-             handler: (match, pattern, replacement, flags) => {
-               try {
-                 const regex = new RegExp(pattern, flags);
-                 return result.replace(regex, replacement);
-               } catch (error) {
-                 return result;
-               }
-             }
-           },
-           // 単純な文字列置換: "search" -> "replace"
-           {
-             pattern: /"([^"]+)"\s*->\s*"([^"]*)"/g,
-             handler: (match, search, replacement) => {
-               return result.replace(new RegExp(this.escapeRegExp(search), 'g'), replacement);
-             }
-           }
-         ];
-         
-         // 置換パターンを適用
-         for (const replacePattern of replacePatterns) {
-           result = result.replace(replacePattern.pattern, replacePattern.handler);
-         }
-         
-         return result;
-       }
-       
-       // 正規表現エスケープ
-       escapeRegExp(string) {
-         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-       }
+      // 正規表現エスケープ
+      escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }
       
       extractDomain(url) {
         try {
@@ -186,9 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const statusDiv = document.getElementById('status');
 
   // 現在のタブの情報を取得
-  console.log('Querying current tab...');
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    console.log('Current tab:', tabs[0]);
     const currentTab = tabs[0];
     const url = currentTab.url;
     const title = currentTab.title;
@@ -212,7 +107,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // カスタム形式機能の初期化
-    console.log('Initializing custom format with URL:', url, 'Title:', title);
     initializeCustomFormat(url, title);
   });
 
@@ -263,8 +157,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 国際化初期化関数
   function initializeI18n() {
-    console.log('Initializing i18n...');
-    
     // ボタンのテキスト
     const i18nElements = document.querySelectorAll('[data-i18n]');
     i18nElements.forEach(function(element) {
@@ -293,20 +185,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelBtn = document.getElementById('cancel-custom');
     const savedFormatsList = document.getElementById('saved-formats-list');
 
-    console.log('DOM elements found:');
-    console.log('toggleBtn:', toggleBtn);
-    console.log('saveBtn:', saveBtn);
-    console.log('formatNameInput:', formatNameInput);
-    console.log('formatInput:', formatInput);
+
 
     let editingFormatId = null;
 
     // 保存された形式を読み込む関数
     function loadSavedFormats() {
-      console.log('loadSavedFormats called');
       chrome.storage.sync.get(['customFormats'], function(result) {
         const formats = result.customFormats || [];
-        console.log('Loaded formats:', formats);
         
         // メインボタンエリアにカスタム形式ボタンを追加
         updateCustomFormatButtons(formats);
@@ -319,22 +205,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // メインボタンエリアにカスタム形式ボタンを追加する関数
     function updateCustomFormatButtons(formats) {
       const copyButtons = document.querySelector('.copy-buttons');
-      console.log('copyButtons element:', copyButtons);
-      console.log('formats to add:', formats);
       
       if (!copyButtons) {
-        console.error('copyButtons element not found!');
         return;
       }
       
       // 既存のカスタム形式ボタンを削除
       const existingCustomButtons = copyButtons.querySelectorAll('.custom-format-btn');
-      console.log('existing custom buttons:', existingCustomButtons.length);
       existingCustomButtons.forEach(btn => btn.remove());
       
       // 新しいカスタム形式ボタンを追加
       formats.forEach(format => {
-        console.log('Creating button for format:', format.name);
         const customButton = document.createElement('button');
         customButton.className = 'copy-btn custom-format-btn';
         customButton.dataset.formatId = format.id;
@@ -589,7 +470,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // トグルボタンのクリックイベント
     if (toggleBtn) {
       toggleBtn.addEventListener('click', function() {
-        console.log('Toggle button clicked');
         customPanel.classList.toggle('hidden');
         toggleIcon.classList.toggle('rotated');
         
@@ -603,8 +483,6 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
       });
-    } else {
-      console.error('Toggle button not found!');
     }
 
     // リアルタイムプレビュー更新関数
@@ -626,10 +504,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // カスタム形式を保存する関数
     function saveCustomFormat(formatData) {
-      console.log('Saving format:', formatData);
       chrome.storage.sync.get(['customFormats'], function(result) {
         const formats = result.customFormats || [];
-        console.log('Current formats:', formats);
         
         // 既存の形式を更新するか、新しい形式を追加
         const existingIndex = formats.findIndex(f => f.id === formatData.id);
@@ -639,9 +515,7 @@ document.addEventListener('DOMContentLoaded', function() {
           formats.push(formatData);
         }
         
-        console.log('Updated formats:', formats);
         chrome.storage.sync.set({ customFormats: formats }, function() {
-          console.log('Format saved successfully');
           // 保存完了後にリストを更新
           loadSavedFormats();
         });
@@ -651,21 +525,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // 保存ボタン
     if (saveBtn) {
       saveBtn.addEventListener('click', function() {
-        console.log('Save button clicked');
         const formatName = formatNameInput.value.trim();
         const format = formatInput.value.trim();
         
-        console.log('Format name:', formatName);
-        console.log('Format:', format);
-        
         if (!formatName) {
-          console.log('Format name is empty');
           showStatus('formatNameRequired', 'error');
           return;
         }
         
         if (!format) {
-          console.log('Format is empty');
           showStatus('formatRequired', 'error');
           return;
         }
@@ -679,13 +547,10 @@ document.addEventListener('DOMContentLoaded', function() {
           jsCode: jsInput.value.trim()
         };
 
-        console.log('Format data to save:', formatData);
         saveCustomFormat(formatData);
         clearForm();
         showStatus('formatSaved', 'success');
       });
-    } else {
-      console.error('Save button not found!');
     }
 
     // 削除ボタン
@@ -705,8 +570,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // 初期状態では削除ボタンを非表示
       deleteBtn.style.display = 'none';
-    } else {
-      console.error('Delete button not found!');
     }
 
     // キャンセルボタン
@@ -714,8 +577,6 @@ document.addEventListener('DOMContentLoaded', function() {
       cancelBtn.addEventListener('click', function() {
         clearForm();
       });
-    } else {
-      console.error('Cancel button not found!');
     }
 
     // フォームをクリアする関数
@@ -745,12 +606,10 @@ document.addEventListener('DOMContentLoaded', function() {
     clearForm();
     
     // 初期化時に保存された形式を読み込み
-    console.log('Initial loadSavedFormats call');
     loadSavedFormats();
     
     // 少し遅延してから再度読み込み（確実に表示されるように）
     setTimeout(function() {
-      console.log('Delayed loadSavedFormats call');
       loadSavedFormats();
     }, 100);
   }
@@ -769,7 +628,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // カスタムJavaScript処理
     if (jsCode && jsCode.trim() !== '') {
       try {
-        const runner = new SecureJSRunner();
+        const runner = new StringReplaceEngine();
         const jsResult = runner.execute(jsCode, { title, url });
         result = result.replace(/\{js\}/g, jsResult);
         
@@ -779,13 +638,13 @@ document.addEventListener('DOMContentLoaded', function() {
           jsErrorDiv.style.display = 'none';
         }
       } catch (error) {
-        console.error('JavaScript処理エラー:', error);
-        result = result.replace(/\{js\}/g, `[JSエラー: ${error.message}]`);
+        console.error('文字列置換エラー:', error);
+        result = result.replace(/\{js\}/g, `[エラー: ${error.message}]`);
         
         // エラー表示
         const jsErrorDiv = document.getElementById('js-error');
         if (jsErrorDiv) {
-          jsErrorDiv.textContent = `JavaScriptエラー: ${error.message}`;
+          jsErrorDiv.textContent = `文字列置換エラー: ${error.message}`;
           jsErrorDiv.style.display = 'block';
         }
       }
