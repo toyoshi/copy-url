@@ -11,6 +11,10 @@
     "message": "Just URL COPY FREE",
     "description": "Popup title"
   },
+  "appSubtitle": {
+    "message": "URLを複数の形式でコピー",
+    "description": "App subtitle"
+  },
   "copyTitleUrl": {
     "message": "タイトル + URL",
     "description": "Copy button for title and URL format"

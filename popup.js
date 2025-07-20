@@ -59,6 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const popupTitle = document.getElementById('popup-title');
     popupTitle.textContent = chrome.i18n.getMessage('popupTitle');
 
+    // アプリサブタイトル
+    const appSubtitle = document.getElementById('app-subtitle');
+    appSubtitle.textContent = chrome.i18n.getMessage('appSubtitle');
+
     // ボタンのテキスト
     const i18nElements = document.querySelectorAll('[data-i18n]');
     i18nElements.forEach(function(element) {

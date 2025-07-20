@@ -11,6 +11,10 @@
     "message": "Just URL COPY FREE",
     "description": "Popup title"
   },
+  "appSubtitle": {
+    "message": "Copy URLs in multiple formats",
+    "description": "App subtitle"
+  },
   "copyTitleUrl": {
     "message": "Title + URL",
     "description": "Copy button for title and URL format"
