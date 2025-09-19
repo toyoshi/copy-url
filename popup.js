@@ -124,16 +124,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let editingFormatId = null;
 
+    // イベントリスナー管理用のWeakMap
+    const customButtonListeners = new WeakMap();
+    const editButtonListeners = new WeakMap();
+
     // 保存された形式を読み込む関数
     function loadSavedFormats() {
       console.log('loadSavedFormats called');
       chrome.storage.sync.get(['customFormats'], function(result) {
+        if (chrome.runtime.lastError) {
+          console.error('Failed to load formats:', chrome.runtime.lastError);
+          showStatus('loadError', 'error');
+          return;
+        }
         const formats = result.customFormats || [];
         console.log('Loaded formats:', formats);
-        
+
         // メインボタンエリアにカスタム形式ボタンを追加
         updateCustomFormatButtons(formats);
-        
+
         // 保存された形式リストは非表示にする（メインボタンエリアに表示するため）
         savedFormatsList.innerHTML = '';
       });
@@ -150,10 +159,26 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
-      // 既存のカスタム形式ボタンを削除
+      // 既存のカスタム形式ボタンを削除（イベントリスナーも削除）
       const existingCustomButtons = copyButtons.querySelectorAll('.custom-format-btn');
       console.log('existing custom buttons:', existingCustomButtons.length);
-      existingCustomButtons.forEach(btn => btn.remove());
+      existingCustomButtons.forEach(btn => {
+        // WeakMapからリスナーを取得して削除
+        const listener = customButtonListeners.get(btn);
+        if (listener) {
+          btn.removeEventListener('click', listener);
+          customButtonListeners.delete(btn);
+        }
+        const editBtn = btn.querySelector('.edit-btn');
+        if (editBtn) {
+          const editListener = editButtonListeners.get(editBtn);
+          if (editListener) {
+            editBtn.removeEventListener('click', editListener);
+            editButtonListeners.delete(editBtn);
+          }
+        }
+        btn.remove();
+      });
       
       // 新しいカスタム形式ボタンを追加
       formats.forEach(format => {
@@ -165,42 +190,53 @@ document.addEventListener('DOMContentLoaded', function() {
         // まずボタンをDOMに追加
         copyButtons.appendChild(customButton);
         
-        customButton.innerHTML = `
-          <div class="btn-content">
-            <span class="btn-title">${format.name}</span>
-          </div>
-          <div class="btn-actions">
-            <button class="edit-btn" title="編集">✏️</button>
-          </div>
-        `;
+        // XSS対策: innerHTMLの代わりにDOM APIを使用
+        const btnContent = document.createElement('div');
+        btnContent.className = 'btn-content';
+        const btnTitle = document.createElement('span');
+        btnTitle.className = 'btn-title';
+        btnTitle.textContent = format.name; // textContentでエスケープ
+        btnContent.appendChild(btnTitle);
+
+        const btnActions = document.createElement('div');
+        btnActions.className = 'btn-actions';
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn';
+        editBtn.title = '編集';
+        editBtn.textContent = '✏️';
+        btnActions.appendChild(editBtn);
+
+        customButton.appendChild(btnContent);
+        customButton.appendChild(btnActions);
         
-        // コピーイベントを追加
-        customButton.addEventListener('click', function(e) {
+        // コピーイベントを追加（WeakMapに保存）
+        const copyListener = function(e) {
           // 編集ボタンがクリックされた場合はコピーしない
           if (e.target.classList.contains('edit-btn')) {
             return;
           }
-          
+
           // 現在のタブ情報を取得してコピー
           chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             const currentTab = tabs[0];
             const copiedText = processCustomFormat(
-              format.format, 
-              currentTab.title, 
-              currentTab.url, 
-              format.searchPattern, 
+              format.format,
+              currentTab.title,
+              currentTab.url,
+              format.searchPattern,
               format.replacePattern
             );
             copyToClipboard(copiedText, 'customFormatCopied');
           });
-        });
+        };
+        customButton.addEventListener('click', copyListener);
+        customButtonListeners.set(customButton, copyListener);
         
-        // 編集ボタンのイベントを追加
-        const editBtn = customButton.querySelector('.edit-btn');
-        editBtn.addEventListener('click', function(e) {
+        // 編集ボタンのイベントを追加（WeakMapに保存）
+        const editListener = function(e) {
           e.preventDefault();
           e.stopPropagation();
-          
+
           // フォームに現在の値を設定
           editingFormatId = format.id;
           formatNameInput.value = format.name;
@@ -208,193 +244,40 @@ document.addEventListener('DOMContentLoaded', function() {
           searchInput.value = format.searchPattern;
           replaceInput.value = format.replacePattern;
           updatePreview();
-          
+
           // カスタムパネルを開く
           customPanel.classList.remove('hidden');
           toggleIcon.classList.add('rotated');
-          
+
           // 編集モードなので削除ボタンを表示
           if (deleteBtn) {
             deleteBtn.style.display = 'inline-block';
           }
-        });
-        
-
-      });
-    }
-
-    // 形式アイテムを作成する関数
-    function createFormatItem(format) {
-      const item = document.createElement('div');
-      item.className = 'saved-format-item';
-      
-      // 現在のタブ情報を取得してプレビューを生成
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        const currentTab = tabs[0];
-        const preview = processCustomFormat(
-          format.format, 
-          currentTab.title, 
-          currentTab.url, 
-          format.searchPattern, 
-          format.replacePattern
-        );
-        
-        item.innerHTML = `
-          <div class="format-info" style="cursor: pointer;">
-            <div class="format-name">${format.name}</div>
-            <div class="format-preview">${preview}</div>
-          </div>
-          <div class="format-actions">
-            <a href="#" class="edit-link" data-i18n="editLink">編集</a>
-            <div class="edit-actions" style="display: none;">
-              <a href="#" class="edit-action save-action" data-i18n="saveAction">保存</a>
-              <a href="#" class="edit-action cancel-action" data-i18n="cancelAction">キャンセル</a>
-              <a href="#" class="edit-action delete-action delete" data-i18n="deleteAction">削除</a>
-            </div>
-          </div>
-        `;
-        
-        // 国際化を適用
-        const editLink = item.querySelector('.edit-link');
-        const saveAction = item.querySelector('.save-action');
-        const cancelAction = item.querySelector('.cancel-action');
-        const deleteAction = item.querySelector('.delete-action');
-        
-        editLink.textContent = chrome.i18n.getMessage('editLink') || '編集';
-        saveAction.textContent = chrome.i18n.getMessage('saveAction') || '保存';
-        cancelAction.textContent = chrome.i18n.getMessage('cancelAction') || 'キャンセル';
-        deleteAction.textContent = chrome.i18n.getMessage('deleteAction') || '削除';
-        
-        // イベントリスナーを追加
-        setupFormatItemEvents(item, format);
-      });
-      
-      return item;
-    }
-
-    // 形式アイテムのイベントを設定する関数
-    function setupFormatItemEvents(item, format) {
-      const formatInfo = item.querySelector('.format-info');
-      const editLink = item.querySelector('.edit-link');
-      const editActions = item.querySelector('.edit-actions');
-      const saveAction = item.querySelector('.save-action');
-      const cancelAction = item.querySelector('.cancel-action');
-      const deleteAction = item.querySelector('.delete-action');
-      
-      // 形式情報のクリック（コピー実行）
-      formatInfo.addEventListener('click', function(e) {
-        // 編集アクションが表示されている場合はコピーしない
-        if (editActions.style.display !== 'none') {
-          return;
-        }
-        
-        e.preventDefault();
-        
-        // 現在のタブ情報を取得してコピー
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-          const currentTab = tabs[0];
-          const copiedText = processCustomFormat(
-            format.format, 
-            currentTab.title, 
-            currentTab.url, 
-            format.searchPattern, 
-            format.replacePattern
-          );
-          
-          copyToClipboard(copiedText, 'customFormatCopied');
-        });
-      });
-      
-      // 編集リンクのクリック
-      editLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation(); // 親要素のクリックイベントを防ぐ
-        
-        // フォームに現在の値を設定
-        editingFormatId = format.id;
-        formatNameInput.value = format.name;
-        formatInput.value = format.format;
-        searchInput.value = format.searchPattern;
-        replaceInput.value = format.replacePattern;
-        updatePreview();
-        
-        // カスタムパネルを開く
-        customPanel.classList.remove('hidden');
-        toggleIcon.classList.add('rotated');
-        
-        // 編集モードなので削除ボタンを表示
-        if (deleteBtn) {
-          deleteBtn.style.display = 'inline-block';
-        }
-        
-        // 編集モードを終了
-        editLink.style.display = 'inline';
-        editActions.style.display = 'none';
-      });
-      
-      // 保存アクション（編集モードでの保存）
-      saveAction.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation(); // 親要素のクリックイベントを防ぐ
-        
-        const formatName = formatNameInput.value.trim();
-        const formatText = formatInput.value.trim();
-        
-        if (!formatName) {
-          showStatus('formatNameRequired', 'error');
-          return;
-        }
-        
-        if (!formatText) {
-          showStatus('formatRequired', 'error');
-          return;
-        }
-
-        const updatedFormatData = {
-          id: format.id,
-          name: formatName,
-          format: formatText,
-          searchPattern: searchInput.value.trim(),
-          replacePattern: replaceInput.value.trim()
         };
-
-        saveCustomFormat(updatedFormatData);
-        clearForm();
-        showStatus('formatSaved', 'success');
+        editBtn.addEventListener('click', editListener);
+        editButtonListeners.set(editBtn, editListener);
         
-        // 編集モードを終了
-        editLink.style.display = 'inline';
-        editActions.style.display = 'none';
-      });
-      
-      // キャンセルアクション
-      cancelAction.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation(); // 親要素のクリックイベントを防ぐ
-        // 編集モードを終了
-        editLink.style.display = 'inline';
-        editActions.style.display = 'none';
-      });
-      
-      // 削除アクション
-      deleteAction.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation(); // 親要素のクリックイベントを防ぐ
-        const deleteConfirmMessage = chrome.i18n.getMessage('deleteConfirm') || 'この形式を削除しますか？';
-        if (confirm(deleteConfirmMessage)) {
-          deleteCustomFormat(format.id);
-          loadSavedFormats();
-          showStatus('formatDeleted', 'success');
-        }
+
       });
     }
+
 
     // カスタム形式を削除する関数
     function deleteCustomFormat(formatId) {
       chrome.storage.sync.get(['customFormats'], function(result) {
+        if (chrome.runtime.lastError) {
+          console.error('Failed to get formats:', chrome.runtime.lastError);
+          showStatus('deleteError', 'error');
+          return;
+        }
         const formats = result.customFormats || [];
         const filteredFormats = formats.filter(f => f.id !== formatId);
         chrome.storage.sync.set({ customFormats: filteredFormats }, function() {
+          if (chrome.runtime.lastError) {
+            console.error('Failed to delete format:', chrome.runtime.lastError);
+            showStatus('deleteError', 'error');
+            return;
+          }
           // 削除完了後にリストを更新
           loadSavedFormats();
         });
@@ -431,19 +314,34 @@ document.addEventListener('DOMContentLoaded', function() {
       previewBox.textContent = preview;
     }
 
-    // 各入力フィールドのイベントリスナー
-    formatNameInput.addEventListener('input', updatePreview);
-    formatInput.addEventListener('input', updatePreview);
-    searchInput.addEventListener('input', updatePreview);
-    replaceInput.addEventListener('input', updatePreview);
+    // デバウンス関数
+    let updatePreviewTimeout;
+    function debounce(func, delay) {
+      return function() {
+        clearTimeout(updatePreviewTimeout);
+        updatePreviewTimeout = setTimeout(func, delay);
+      };
+    }
+
+    // 各入力フィールドのイベントリスナー（デバウンス付き）
+    const debouncedUpdatePreview = debounce(updatePreview, 300);
+    formatNameInput.addEventListener('input', debouncedUpdatePreview);
+    formatInput.addEventListener('input', debouncedUpdatePreview);
+    searchInput.addEventListener('input', debouncedUpdatePreview);
+    replaceInput.addEventListener('input', debouncedUpdatePreview);
 
     // カスタム形式を保存する関数
     function saveCustomFormat(formatData) {
       console.log('Saving format:', formatData);
       chrome.storage.sync.get(['customFormats'], function(result) {
+        if (chrome.runtime.lastError) {
+          console.error('Failed to get formats:', chrome.runtime.lastError);
+          showStatus('saveError', 'error');
+          return;
+        }
         const formats = result.customFormats || [];
         console.log('Current formats:', formats);
-        
+
         // 既存の形式を更新するか、新しい形式を追加
         const existingIndex = formats.findIndex(f => f.id === formatData.id);
         if (existingIndex >= 0) {
@@ -451,9 +349,14 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           formats.push(formatData);
         }
-        
+
         console.log('Updated formats:', formats);
         chrome.storage.sync.set({ customFormats: formats }, function() {
+          if (chrome.runtime.lastError) {
+            console.error('Failed to save format:', chrome.runtime.lastError);
+            showStatus('saveError', 'error');
+            return;
+          }
           console.log('Format saved successfully');
           // 保存完了後にリストを更新
           loadSavedFormats();
@@ -553,16 +456,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 初期プレビュー
     clearForm();
-    
-    // 初期化時に保存された形式を読み込み
+
+    // 初期化時に保存された形式を読み込み（一度だけ）
     console.log('Initial loadSavedFormats call');
     loadSavedFormats();
-    
-    // 少し遅延してから再度読み込み（確実に表示されるように）
-    setTimeout(function() {
-      console.log('Delayed loadSavedFormats call');
-      loadSavedFormats();
-    }, 100);
   }
 
   // カスタムフォーマット処理関数
