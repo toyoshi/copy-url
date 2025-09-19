@@ -50,13 +50,14 @@ document.addEventListener('DOMContentLoaded', async function() {
   // ステータスメッセージを表示する関数
   function showStatus(messageKey, type) {
     const message = chrome.i18n.getMessage(messageKey);
+
     console.log('Message key:', messageKey);
     console.log('Retrieved message:', message);
-    
+
     // メッセージが取得できない場合のフォールバック
     const currentLocale = chrome.i18n.getUILanguage();
     const isJapanese = currentLocale.startsWith('ja');
-    
+
     const fallbackMessages = {
       'copyError': isJapanese ? 'コピーに失敗しました' : 'Failed to copy',
       'presetCopied': isJapanese ? 'コピーしました' : 'Copied',
@@ -64,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       'presetError': isJapanese ? 'プリセット実行エラー' : 'Preset execution error',
       'presetSettingsSaved': isJapanese ? 'プリセット設定を保存しました' : 'Preset settings saved'
     };
-    
+
     const displayMessage = message || fallbackMessages[messageKey] || 'Copied successfully';
     statusDiv.textContent = displayMessage;
     statusDiv.className = `status ${type}`;
@@ -78,12 +79,16 @@ document.addEventListener('DOMContentLoaded', async function() {
   // 国際化初期化関数
   function initializeI18n() {
     console.log('Initializing i18n...');
-    
+    console.log('Current UI Language:', chrome.i18n.getUILanguage());
+
+
     // ボタンのテキスト
     const i18nElements = document.querySelectorAll('[data-i18n]');
     i18nElements.forEach(function(element) {
       const messageKey = element.getAttribute('data-i18n');
       const message = chrome.i18n.getMessage(messageKey);
+      console.log(`Chrome i18n - ${messageKey}: ${message}`);
+
       if (message) {
         element.textContent = message;
       }
@@ -159,6 +164,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 
       const isEnabled = userSettings.enabledPresets.includes(preset.id);
 
+      // 表示ラベルの翻訳
+      const displayText = chrome.i18n.getMessage('displayLabel') || '表示';
+
       item.innerHTML = `
         <div class="preset-drag-handle">☰</div>
         <div class="preset-info">
@@ -168,7 +176,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         <div class="preset-controls">
           <label class="checkbox-label">
             <input type="checkbox" class="preset-enabled" ${isEnabled ? 'checked' : ''}>
-            <span>表示</span>
+            <span>${displayText}</span>
           </label>
         </div>
       `;

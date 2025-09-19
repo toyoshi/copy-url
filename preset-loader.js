@@ -46,8 +46,8 @@ class PresetLoader {
     const presets = {
       'title-url-newline': {
         id: 'title-url-newline',
-        name: 'タイトルとURL（改行）',
-        description: 'タイトルとURLを改行で区切ってコピー',
+        nameKey: 'presetTitleUrlNewline',
+        description: 'Copy title and URL separated by newline',
         icon: '📄',
         transform: (url, title) => {
           return {
@@ -58,8 +58,8 @@ class PresetLoader {
       },
       'title-url-space': {
         id: 'title-url-space',
-        name: 'タイトルとURL（スペース）',
-        description: 'タイトルとURLをスペースで繋げてコピー',
+        nameKey: 'presetTitleUrlSpace',
+        description: 'Copy title and URL separated by space',
         icon: '🔗',
         transform: (url, title) => {
           return {
@@ -70,8 +70,8 @@ class PresetLoader {
       },
       'markdown-format': {
         id: 'markdown-format',
-        name: 'Markdown形式',
-        description: 'Markdown形式のリンクとして整形',
+        nameKey: 'presetMarkdownFormat',
+        description: 'Format as Markdown link',
         icon: '📝',
         transform: (url, title) => {
           const escapedTitle = title.replace(/[\[\]]/g, '\\$&');
@@ -83,8 +83,8 @@ class PresetLoader {
       },
       'html-format': {
         id: 'html-format',
-        name: 'HTML形式',
-        description: 'HTML形式のリンクとして整形',
+        nameKey: 'presetHtmlFormat',
+        description: 'Format as HTML link',
         icon: '🌐',
         transform: (url, title) => {
           const escapedTitle = title.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -96,8 +96,8 @@ class PresetLoader {
       },
       'selected-text-format': {
         id: 'selected-text-format',
-        name: '選択テキスト+タイトル+URL',
-        description: '選択テキスト、改行2つ、タイトル、改行、URLの順で整形',
+        nameKey: 'presetSelectedTextFormat',
+        description: 'Format with selected text, title and URL',
         icon: '✂️',
         transform: (url, title, selectedText = '') => {
           if (selectedText && selectedText.trim()) {
@@ -120,8 +120,8 @@ class PresetLoader {
   }
 
   validatePreset(preset) {
-    if (!preset.id || !preset.name) {
-      throw new Error('Preset must have id and name');
+    if (!preset.id || (!preset.name && !preset.nameKey)) {
+      throw new Error('Preset must have id and name or nameKey');
     }
 
     if (!preset.transform && !preset.format) {
@@ -183,12 +183,37 @@ class PresetLoader {
   getActivePresets() {
     return this.userSettings.presetOrder
       .filter(id => this.userSettings.enabledPresets.includes(id))
-      .map(id => this.presets.get(id))
+      .map(id => {
+        const preset = this.presets.get(id);
+        if (preset) {
+          // プリセット名を翻訳
+          return {
+            ...preset,
+            name: this.getTranslatedName(preset)
+          };
+        }
+        return null;
+      })
       .filter(Boolean);
   }
 
+  getTranslatedName(preset) {
+    if (typeof window !== 'undefined' && window.chrome && chrome.i18n) {
+      const translatedName = chrome.i18n.getMessage(preset.nameKey);
+      return translatedName || preset.nameKey; // フォールバック
+    }
+    return preset.nameKey; // chrome.i18nが使えない場合
+  }
+
   getPresetById(id) {
-    return this.presets.get(id);
+    const preset = this.presets.get(id);
+    if (preset) {
+      return {
+        ...preset,
+        name: this.getTranslatedName(preset)
+      };
+    }
+    return null;
   }
 
   async updatePresetOrder(newOrder) {

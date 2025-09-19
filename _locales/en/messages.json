@@ -30,5 +30,45 @@
   "copyError": {
     "message": "Failed to copy",
     "description": "Error message when copy fails"
+  },
+  "presetTitleUrlNewline": {
+    "message": "Title and URL (Newline)",
+    "description": "Preset name for title and URL with newline"
+  },
+  "presetTitleUrlSpace": {
+    "message": "Title and URL (Space)",
+    "description": "Preset name for title and URL with space"
+  },
+  "presetMarkdownFormat": {
+    "message": "Markdown Format",
+    "description": "Preset name for Markdown format"
+  },
+  "presetHtmlFormat": {
+    "message": "HTML Format",
+    "description": "Preset name for HTML format"
+  },
+  "presetSelectedTextFormat": {
+    "message": "Selected Text + Title + URL",
+    "description": "Preset name for selected text format"
+  },
+  "presetManagementTitle": {
+    "message": "Preset Management",
+    "description": "Title of preset management modal"
+  },
+  "presetManagementDescription": {
+    "message": "Change the display order of presets and toggle visibility on/off.",
+    "description": "Description text in preset management modal"
+  },
+  "saveButton": {
+    "message": "Save",
+    "description": "Save button text"
+  },
+  "cancelButton": {
+    "message": "Cancel",
+    "description": "Cancel button text"
+  },
+  "displayLabel": {
+    "message": "Display",
+    "description": "Display/hide checkbox label"
   }
 } 
