@@ -9,78 +9,43 @@
 <body>
   <div class="container">
     <div class="copy-buttons">
-      <button id="copy-title-url" class="copy-btn">
-        <span class="btn-title" data-i18n="copyTitleUrl">Title + URL</span>
-      </button>
-      
-      <button id="copy-markdown" class="copy-btn">
-        <span class="btn-title" data-i18n="copyMarkdown">Markdown Format</span>
-      </button>
-      
-      <button id="copy-html" class="copy-btn">
-        <span class="btn-title" data-i18n="copyHtml">HTML Format</span>
-      </button>
+      <!-- プリセットボタンがここに動的に追加される -->
+      <div id="preset-buttons-container"></div>
     </div>
     
     <div id="status" class="status"></div>
     
-    <!-- カスタム形式セクション -->
-    <div class="custom-section">
-      <button id="toggle-custom" class="custom-toggle">
-        <span data-i18n="customFormat">独自形式を定義する</span>
-        <span class="toggle-icon">▼</span>
+    <!-- プリセット管理セクション -->
+    <div class="preset-management">
+      <button id="manage-presets" class="preset-manage-btn">
+        <span data-i18n="managePresets">プリセット管理</span>
+        <span class="manage-icon">⚙️</span>
       </button>
-      
-      <div id="custom-panel" class="custom-panel hidden">
-        <div class="custom-form">
-          <div class="format-name-section">
-            <label for="format-name" data-i18n="formatNameLabel">形式名:</label>
-            <input type="text" id="format-name" placeholder="カスタム形式1" maxlength="30">
-          </div>
-          
-          <label for="custom-format" data-i18n="formatLabel">フォーマット定義:</label>
-          <textarea id="custom-format" placeholder="{title} - {url}" rows="3"></textarea>
-          
-          <div class="replace-section">
-            <label data-i18n="replaceLabel">置換ルール（オプション）:</label>
-            <div class="replace-inputs">
-              <div class="replace-input-group">
-                <label for="search-pattern" data-i18n="searchLabel">正規表現:</label>
-                <input type="text" id="search-pattern" placeholder="/pattern/g">
-              </div>
-              <div class="replace-input-group">
-                <label for="replace-pattern" data-i18n="replaceWithLabel">置換:</label>
-                <input type="text" id="replace-pattern" placeholder="置換文字列">
-              </div>
-            </div>
-            <div class="regex-help">
-              <small data-i18n="regexHelp">例: / - /g で「 - 」を全て置換、/^(.+)$/ で行全体をキャプチャ</small>
-            </div>
-          </div>
-          
-          <div class="preview-section">
-            <label data-i18n="previewLabel">プレビュー:</label>
-            <div id="custom-preview" class="preview-box"></div>
-          </div>
-          
-          <div class="custom-buttons">
-            <button id="save-custom" class="save-btn" data-i18n="saveButton">保存</button>
-            <button id="delete-custom" class="delete-btn-form" data-i18n="deleteButton">削除</button>
-            <button id="cancel-custom" class="cancel-btn" data-i18n="cancelButton">キャンセル</button>
+    </div>
+
+
+    <!-- プリセット管理モーダル -->
+    <div id="preset-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>プリセット管理</h3>
+          <button id="close-preset-modal" class="close-btn">✕</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-description">プリセットの表示順序を変更し、表示/非表示を切り替えできます。</p>
+          <div id="preset-list" class="preset-list">
+            <!-- プリセット一覧がここに動的に表示される -->
           </div>
         </div>
-        
-        <!-- 保存された形式セクションは非表示（メインボタンエリアに表示するため） -->
-        <div class="saved-formats" style="display: none;">
-          <h4 data-i18n="savedFormatsTitle">保存された形式</h4>
-          <div id="saved-formats-list" class="formats-list">
-            <!-- 保存された形式がここに動的に追加される -->
-          </div>
+        <div class="modal-footer">
+          <button id="save-preset-settings" class="save-btn">保存</button>
+          <button id="cancel-preset-settings" class="cancel-btn">キャンセル</button>
         </div>
       </div>
     </div>
   </div>
-  
+
+  <script src="preset-loader.js"></script>
   <script src="popup.js"></script>
 </body>
 </html> 

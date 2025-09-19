@@ -1,13 +1,17 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   console.log('DOMContentLoaded event fired');
-  
+
   try {
     // 国際化対応
     initializeI18n();
-  
-  const copyTitleUrlBtn = document.getElementById('copy-title-url');
-  const copyMarkdownBtn = document.getElementById('copy-markdown');
-  const copyHtmlBtn = document.getElementById('copy-html');
+
+    // プリセット機能を初期化
+    await window.presetLoader.loadAllPresets();
+    console.log('Presets loaded');
+
+    // デバッグ用：設定をリセット（開発時のみ）
+    await resetPresetSettings();
+
   const statusDiv = document.getElementById('status');
 
   // 現在のタブの情報を取得
@@ -18,27 +22,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const url = currentTab.url;
     const title = currentTab.title;
 
-    // タイトル + URL形式でコピー
-    copyTitleUrlBtn.addEventListener('click', function() {
-      const text = `${title} - ${url}`;
-      copyToClipboard(text, 'copySuccessTitleUrl');
-    });
+    // プリセットボタンを表示
+    renderPresetButtons(url, title, currentTab);
 
-    // Markdown形式でコピー
-    copyMarkdownBtn.addEventListener('click', function() {
-      const text = `[${title}](${url})`;
-      copyToClipboard(text, 'copySuccessMarkdown');
-    });
-
-    // HTML形式でコピー
-    copyHtmlBtn.addEventListener('click', function() {
-      const text = `<a href="${url}">${title}</a>`;
-      copyToClipboard(text, 'copySuccessHtml');
-    });
-
-    // カスタム形式機能の初期化
-    console.log('Initializing custom format with URL:', url, 'Title:', title);
-    initializeCustomFormat(url, title);
+    // プリセット管理機能の初期化
+    initializePresetManagement();
   });
 
   // クリップボードにコピーする関数
@@ -70,10 +58,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const isJapanese = currentLocale.startsWith('ja');
     
     const fallbackMessages = {
-      'copySuccessTitleUrl': isJapanese ? 'タイトル + URLをコピーしました' : 'Title + URL copied successfully',
-      'copySuccessMarkdown': isJapanese ? 'Markdown形式でコピーしました' : 'Markdown format copied successfully',
-      'copySuccessHtml': isJapanese ? 'HTML形式でコピーしました' : 'HTML format copied successfully',
-      'copyError': isJapanese ? 'コピーに失敗しました' : 'Failed to copy'
+      'copyError': isJapanese ? 'コピーに失敗しました' : 'Failed to copy',
+      'presetCopied': isJapanese ? 'コピーしました' : 'Copied',
+      'presetNotApplicable': isJapanese ? 'このURLには適用できません' : 'Not applicable for this URL',
+      'presetError': isJapanese ? 'プリセット実行エラー' : 'Preset execution error',
+      'presetSettingsSaved': isJapanese ? 'プリセット設定を保存しました' : 'Preset settings saved'
     };
     
     const displayMessage = message || fallbackMessages[messageKey] || 'Copied successfully';
@@ -101,412 +90,256 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // カスタム形式機能の初期化
-  function initializeCustomFormat(url, title) {
-    const toggleBtn = document.getElementById('toggle-custom');
-    const customPanel = document.getElementById('custom-panel');
-    const toggleIcon = toggleBtn.querySelector('.toggle-icon');
-    const formatNameInput = document.getElementById('format-name');
-    const formatInput = document.getElementById('custom-format');
-    const searchInput = document.getElementById('search-pattern');
-    const replaceInput = document.getElementById('replace-pattern');
-    const previewBox = document.getElementById('custom-preview');
-    const saveBtn = document.getElementById('save-custom');
-    const deleteBtn = document.getElementById('delete-custom');
-    const cancelBtn = document.getElementById('cancel-custom');
-    const savedFormatsList = document.getElementById('saved-formats-list');
 
-    console.log('DOM elements found:');
-    console.log('toggleBtn:', toggleBtn);
-    console.log('saveBtn:', saveBtn);
-    console.log('formatNameInput:', formatNameInput);
-    console.log('formatInput:', formatInput);
+  // プリセット管理機能の初期化
+  function initializePresetManagement() {
+    const manageBtn = document.getElementById('manage-presets');
+    const modal = document.getElementById('preset-modal');
+    const closeBtn = document.getElementById('close-preset-modal');
+    const saveBtn = document.getElementById('save-preset-settings');
+    const cancelBtn = document.getElementById('cancel-preset-settings');
+    const presetList = document.getElementById('preset-list');
 
-    let editingFormatId = null;
-
-    // イベントリスナー管理用のWeakMap
-    const customButtonListeners = new WeakMap();
-    const editButtonListeners = new WeakMap();
-
-    // 保存された形式を読み込む関数
-    function loadSavedFormats() {
-      console.log('loadSavedFormats called');
-      chrome.storage.sync.get(['customFormats'], function(result) {
-        if (chrome.runtime.lastError) {
-          console.error('Failed to load formats:', chrome.runtime.lastError);
-          showStatus('loadError', 'error');
-          return;
-        }
-        const formats = result.customFormats || [];
-        console.log('Loaded formats:', formats);
-
-        // メインボタンエリアにカスタム形式ボタンを追加
-        updateCustomFormatButtons(formats);
-
-        // 保存された形式リストは非表示にする（メインボタンエリアに表示するため）
-        savedFormatsList.innerHTML = '';
-      });
+    if (!manageBtn || !modal) {
+      console.error('Preset management elements not found');
+      return;
     }
 
-    // メインボタンエリアにカスタム形式ボタンを追加する関数
-    function updateCustomFormatButtons(formats) {
-      const copyButtons = document.querySelector('.copy-buttons');
-      console.log('copyButtons element:', copyButtons);
-      console.log('formats to add:', formats);
-      
-      if (!copyButtons) {
-        console.error('copyButtons element not found!');
-        return;
-      }
-      
-      // 既存のカスタム形式ボタンを削除（イベントリスナーも削除）
-      const existingCustomButtons = copyButtons.querySelectorAll('.custom-format-btn');
-      console.log('existing custom buttons:', existingCustomButtons.length);
-      existingCustomButtons.forEach(btn => {
-        // WeakMapからリスナーを取得して削除
-        const listener = customButtonListeners.get(btn);
-        if (listener) {
-          btn.removeEventListener('click', listener);
-          customButtonListeners.delete(btn);
-        }
-        const editBtn = btn.querySelector('.edit-btn');
-        if (editBtn) {
-          const editListener = editButtonListeners.get(editBtn);
-          if (editListener) {
-            editBtn.removeEventListener('click', editListener);
-            editButtonListeners.delete(editBtn);
-          }
-        }
-        btn.remove();
-      });
-      
-      // 新しいカスタム形式ボタンを追加
-      formats.forEach(format => {
-        console.log('Creating button for format:', format.name);
-        const customButton = document.createElement('button');
-        customButton.className = 'copy-btn custom-format-btn';
-        customButton.dataset.formatId = format.id;
-        
-        // まずボタンをDOMに追加
-        copyButtons.appendChild(customButton);
-        
-        // XSS対策: innerHTMLの代わりにDOM APIを使用
-        const btnContent = document.createElement('div');
-        btnContent.className = 'btn-content';
-        const btnTitle = document.createElement('span');
-        btnTitle.className = 'btn-title';
-        btnTitle.textContent = format.name; // textContentでエスケープ
-        btnContent.appendChild(btnTitle);
+    // プリセット管理ボタンクリック
+    manageBtn.addEventListener('click', function() {
+      renderPresetManagementList();
+      modal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    });
 
-        const btnActions = document.createElement('div');
-        btnActions.className = 'btn-actions';
-        const editBtn = document.createElement('button');
-        editBtn.className = 'edit-btn';
-        editBtn.title = '編集';
-        editBtn.textContent = '✏️';
-        btnActions.appendChild(editBtn);
-
-        customButton.appendChild(btnContent);
-        customButton.appendChild(btnActions);
-        
-        // コピーイベントを追加（WeakMapに保存）
-        const copyListener = function(e) {
-          // 編集ボタンがクリックされた場合はコピーしない
-          if (e.target.classList.contains('edit-btn')) {
-            return;
-          }
-
-          // 現在のタブ情報を取得してコピー
-          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            const currentTab = tabs[0];
-            const copiedText = processCustomFormat(
-              format.format,
-              currentTab.title,
-              currentTab.url,
-              format.searchPattern,
-              format.replacePattern
-            );
-            copyToClipboard(copiedText, 'customFormatCopied');
-          });
-        };
-        customButton.addEventListener('click', copyListener);
-        customButtonListeners.set(customButton, copyListener);
-        
-        // 編集ボタンのイベントを追加（WeakMapに保存）
-        const editListener = function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          // フォームに現在の値を設定
-          editingFormatId = format.id;
-          formatNameInput.value = format.name;
-          formatInput.value = format.format;
-          searchInput.value = format.searchPattern;
-          replaceInput.value = format.replacePattern;
-          updatePreview();
-
-          // カスタムパネルを開く
-          customPanel.classList.remove('hidden');
-          toggleIcon.classList.add('rotated');
-
-          // 編集モードなので削除ボタンを表示
-          if (deleteBtn) {
-            deleteBtn.style.display = 'inline-block';
-          }
-        };
-        editBtn.addEventListener('click', editListener);
-        editButtonListeners.set(editBtn, editListener);
-        
-
-      });
-    }
-
-
-    // カスタム形式を削除する関数
-    function deleteCustomFormat(formatId) {
-      chrome.storage.sync.get(['customFormats'], function(result) {
-        if (chrome.runtime.lastError) {
-          console.error('Failed to get formats:', chrome.runtime.lastError);
-          showStatus('deleteError', 'error');
-          return;
-        }
-        const formats = result.customFormats || [];
-        const filteredFormats = formats.filter(f => f.id !== formatId);
-        chrome.storage.sync.set({ customFormats: filteredFormats }, function() {
-          if (chrome.runtime.lastError) {
-            console.error('Failed to delete format:', chrome.runtime.lastError);
-            showStatus('deleteError', 'error');
-            return;
-          }
-          // 削除完了後にリストを更新
-          loadSavedFormats();
-        });
-      });
-    }
-
-    // トグルボタンのクリックイベント
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', function() {
-        console.log('Toggle button clicked');
-        customPanel.classList.toggle('hidden');
-        toggleIcon.classList.toggle('rotated');
-        
-        // パネルが開いた時に保存された形式を読み込み
-        if (!customPanel.classList.contains('hidden')) {
-          loadSavedFormats();
-          
-          // 新規作成モードなので削除ボタンを非表示
-          if (deleteBtn) {
-            deleteBtn.style.display = 'none';
-          }
-        }
-      });
-    } else {
-      console.error('Toggle button not found!');
-    }
-
-    // リアルタイムプレビュー更新関数
-    function updatePreview() {
-      const format = formatInput.value;
-      const searchPattern = searchInput.value;
-      const replacePattern = replaceInput.value;
-      const preview = processCustomFormat(format, title, url, searchPattern, replacePattern);
-      previewBox.textContent = preview;
-    }
-
-    // デバウンス関数
-    let updatePreviewTimeout;
-    function debounce(func, delay) {
-      return function() {
-        clearTimeout(updatePreviewTimeout);
-        updatePreviewTimeout = setTimeout(func, delay);
-      };
-    }
-
-    // 各入力フィールドのイベントリスナー（デバウンス付き）
-    const debouncedUpdatePreview = debounce(updatePreview, 300);
-    formatNameInput.addEventListener('input', debouncedUpdatePreview);
-    formatInput.addEventListener('input', debouncedUpdatePreview);
-    searchInput.addEventListener('input', debouncedUpdatePreview);
-    replaceInput.addEventListener('input', debouncedUpdatePreview);
-
-    // カスタム形式を保存する関数
-    function saveCustomFormat(formatData) {
-      console.log('Saving format:', formatData);
-      chrome.storage.sync.get(['customFormats'], function(result) {
-        if (chrome.runtime.lastError) {
-          console.error('Failed to get formats:', chrome.runtime.lastError);
-          showStatus('saveError', 'error');
-          return;
-        }
-        const formats = result.customFormats || [];
-        console.log('Current formats:', formats);
-
-        // 既存の形式を更新するか、新しい形式を追加
-        const existingIndex = formats.findIndex(f => f.id === formatData.id);
-        if (existingIndex >= 0) {
-          formats[existingIndex] = formatData;
-        } else {
-          formats.push(formatData);
-        }
-
-        console.log('Updated formats:', formats);
-        chrome.storage.sync.set({ customFormats: formats }, function() {
-          if (chrome.runtime.lastError) {
-            console.error('Failed to save format:', chrome.runtime.lastError);
-            showStatus('saveError', 'error');
-            return;
-          }
-          console.log('Format saved successfully');
-          // 保存完了後にリストを更新
-          loadSavedFormats();
-        });
-      });
-    }
+    // モーダルを閉じる
+    closeBtn.addEventListener('click', function() {
+      modal.classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    });
 
     // 保存ボタン
-    if (saveBtn) {
-      saveBtn.addEventListener('click', function() {
-        console.log('Save button clicked');
-        const formatName = formatNameInput.value.trim();
-        const format = formatInput.value.trim();
-        
-        console.log('Format name:', formatName);
-        console.log('Format:', format);
-        
-        if (!formatName) {
-          console.log('Format name is empty');
-          showStatus('formatNameRequired', 'error');
-          return;
-        }
-        
-        if (!format) {
-          console.log('Format is empty');
-          showStatus('formatRequired', 'error');
-          return;
-        }
-
-        const formatData = {
-          id: editingFormatId || Date.now().toString(),
-          name: formatName,
-          format: format,
-          searchPattern: searchInput.value.trim(),
-          replacePattern: replaceInput.value.trim()
-        };
-
-        console.log('Format data to save:', formatData);
-        saveCustomFormat(formatData);
-        clearForm();
-        showStatus('formatSaved', 'success');
+    saveBtn.addEventListener('click', async function() {
+      await savePresetSettings();
+      modal.classList.add('hidden');
+      document.body.classList.remove('modal-open');
+      // プリセットボタンを再描画
+      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        renderPresetButtons(tabs[0].url, tabs[0].title, tabs[0]);
       });
-    } else {
-      console.error('Save button not found!');
-    }
-
-    // 削除ボタン
-    if (deleteBtn) {
-      deleteBtn.addEventListener('click', function() {
-        if (editingFormatId) {
-          const deleteConfirmMessage = chrome.i18n.getMessage('deleteConfirm') || 'この形式を削除しますか？';
-          if (confirm(deleteConfirmMessage)) {
-            deleteCustomFormat(editingFormatId);
-            clearForm();
-            showStatus('formatDeleted', 'success');
-          }
-        } else {
-          showStatus('noFormatToDelete', 'error');
-        }
-      });
-      
-      // 初期状態では削除ボタンを非表示
-      deleteBtn.style.display = 'none';
-    } else {
-      console.error('Delete button not found!');
-    }
+    });
 
     // キャンセルボタン
-    if (cancelBtn) {
-      cancelBtn.addEventListener('click', function() {
-        clearForm();
+    cancelBtn.addEventListener('click', function() {
+      modal.classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    });
+
+    function renderPresetManagementList() {
+      const allPresets = Array.from(window.presetLoader.presets.values());
+      const userSettings = window.presetLoader.userSettings;
+
+      presetList.innerHTML = '';
+
+      // 順序に従ってプリセットを表示
+      userSettings.presetOrder.forEach(presetId => {
+        const preset = window.presetLoader.getPresetById(presetId);
+        if (preset) {
+          const item = createPresetManagementItem(preset, userSettings);
+          presetList.appendChild(item);
+        }
       });
-    } else {
-      console.error('Cancel button not found!');
     }
 
-    // フォームをクリアする関数
-    function clearForm() {
-      formatNameInput.value = '';
-      formatInput.value = '';
-      searchInput.value = '';
-      replaceInput.value = '';
-      previewBox.textContent = '';
-      editingFormatId = null;
-      
-      // 新規作成モードなので削除ボタンを非表示
-      if (deleteBtn) {
-        deleteBtn.style.display = 'none';
-      }
-      
-      // 初期値を設定
-      formatInput.value = '{title} - {url}';
-      searchInput.value = '/ - /g';
-      replaceInput.value = ' | ';
-      updatePreview();
-    }
+    function createPresetManagementItem(preset, userSettings) {
+      const item = document.createElement('div');
+      item.className = 'preset-item';
+      item.dataset.presetId = preset.id;
+      item.draggable = true;
 
-    // 初期プレビュー
-    clearForm();
+      const isEnabled = userSettings.enabledPresets.includes(preset.id);
 
-    // 初期化時に保存された形式を読み込み（一度だけ）
-    console.log('Initial loadSavedFormats call');
-    loadSavedFormats();
-  }
+      item.innerHTML = `
+        <div class="preset-drag-handle">☰</div>
+        <div class="preset-info">
+          <span class="preset-icon">${preset.icon || '📋'}</span>
+          <span class="preset-name">${preset.name}</span>
+        </div>
+        <div class="preset-controls">
+          <label class="checkbox-label">
+            <input type="checkbox" class="preset-enabled" ${isEnabled ? 'checked' : ''}>
+            <span>表示</span>
+          </label>
+        </div>
+      `;
 
-  // カスタムフォーマット処理関数
-  function processCustomFormat(format, title, url, searchPattern, replacePattern) {
-    if (!format) return '';
+      // ドラッグ&ドロップイベントを追加
+      item.addEventListener('dragstart', function(e) {
+        item.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', preset.id);
+        e.dataTransfer.effectAllowed = 'move';
+      });
 
-    // 変数置換
-    let result = format
-      .replace(/\{title\}/g, title)
-      .replace(/\{url\}/g, url);
+      item.addEventListener('dragend', function(e) {
+        item.classList.remove('dragging');
+        // 全ての要素からdrag-overクラスを削除
+        document.querySelectorAll('.preset-item').forEach(el => {
+          el.classList.remove('drag-over');
+        });
+      });
 
-    // 正規表現置換処理
-    if (searchPattern && searchPattern.trim() !== '') {
-      try {
-        // 入力値の安全性チェック
-        if (typeof replacePattern !== 'string') {
-          throw new Error('置換パターンは文字列である必要があります');
+      item.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+
+        if (!item.classList.contains('dragging')) {
+          item.classList.add('drag-over');
+        }
+      });
+
+      item.addEventListener('dragleave', function(e) {
+        item.classList.remove('drag-over');
+      });
+
+      item.addEventListener('drop', function(e) {
+        e.preventDefault();
+        const draggedId = e.dataTransfer.getData('text/plain');
+        const draggedElement = document.querySelector(`[data-preset-id="${draggedId}"]`);
+
+        if (draggedElement && draggedElement !== item) {
+          // 要素の順序を入れ替え
+          const allItems = Array.from(presetList.children);
+          const draggedIndex = allItems.indexOf(draggedElement);
+          const targetIndex = allItems.indexOf(item);
+
+          if (draggedIndex < targetIndex) {
+            presetList.insertBefore(draggedElement, item.nextSibling);
+          } else {
+            presetList.insertBefore(draggedElement, item);
+          }
         }
 
-        // 正規表現の構文解析
-        // /pattern/flags 形式を想定
-        const regexMatch = searchPattern.match(/^\/(.+)\/([gimsuy]*)$/);
-        
-        if (regexMatch) {
-          const pattern = regexMatch[1];
-          const flags = regexMatch[2];
-          
-          // 正規表現オブジェクトを作成
-          const regex = new RegExp(pattern, flags);
-          
-          // 文字列置換のみ許可（関数置換は禁止）
-          result = result.replace(regex, replacePattern);
-        } else {
-          // 正規表現形式でない場合は、文字列として扱う
-          const escapedPattern = searchPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const regex = new RegExp(escapedPattern, 'g');
-          result = result.replace(regex, replacePattern);
-        }
-      } catch (error) {
-        console.error('正規表現エラー:', error);
-        result += ' [正規表現エラー]';
-      }
+        item.classList.remove('drag-over');
+      });
+
+      return item;
     }
 
-    return result;
+    async function savePresetSettings() {
+      const items = presetList.querySelectorAll('.preset-item');
+      const newOrder = [];
+      const newEnabledPresets = [];
+
+      items.forEach(item => {
+        const presetId = item.dataset.presetId;
+        newOrder.push(presetId);
+
+        if (item.querySelector('.preset-enabled').checked) {
+          newEnabledPresets.push(presetId);
+        }
+      });
+
+      await window.presetLoader.updatePresetOrder(newOrder);
+      window.presetLoader.userSettings.enabledPresets = newEnabledPresets;
+      await window.presetLoader.saveUserSettings();
+
+      showStatus('presetSettingsSaved', 'success');
+    }
   }
-  
+
+  // プリセットボタンを表示する関数
+  function renderPresetButtons(url, title, currentTab) {
+    const container = document.getElementById('preset-buttons-container');
+    if (!container) {
+      console.error('Preset buttons container not found');
+      return;
+    }
+
+    container.innerHTML = ''; // 既存のボタンをクリア
+
+    // 有効なプリセットのみを表示
+    const activePresets = window.presetLoader.getActivePresets();
+    console.log('Active presets:', activePresets);
+
+    activePresets.forEach(preset => {
+      const button = document.createElement('button');
+      button.className = 'copy-btn preset-btn';
+      button.innerHTML = `
+        <span class="preset-icon">${preset.icon || '📋'}</span>
+        <span class="btn-title">${preset.name}</span>
+      `;
+
+      button.addEventListener('click', async function() {
+        try {
+          let selectedText = '';
+
+          // 選択テキスト用プリセットの場合は選択テキストを取得
+          if (preset.id === 'selected-text-format') {
+            try {
+              // chrome.scriptingが利用可能かチェック
+              if (chrome.scripting && chrome.scripting.executeScript) {
+                // コンテンツスクリプトを注入して選択テキストを取得
+                const results = await chrome.scripting.executeScript({
+                  target: { tabId: currentTab.id },
+                  func: () => {
+                    try {
+                      return window.getSelection().toString();
+                    } catch (e) {
+                      console.error('Error getting selection:', e);
+                      return '';
+                    }
+                  }
+                });
+
+                if (results && results[0] && results[0].result !== undefined) {
+                  selectedText = results[0].result || '';
+                }
+
+                console.log('Selected text:', selectedText);
+              } else {
+                console.warn('chrome.scripting not available');
+              }
+            } catch (error) {
+              console.warn('Could not get selected text:', error);
+              selectedText = '';
+            }
+          }
+
+          const result = await window.presetLoader.applyPreset(preset, url, title, selectedText);
+          if (result && result.title) {
+            copyToClipboard(result.title, 'presetCopied');
+          } else {
+            console.log(`Preset ${preset.name} not applicable for this URL`);
+            showStatus('presetNotApplicable', 'info');
+          }
+        } catch (error) {
+          console.error('Error applying preset:', error);
+          showStatus('presetError', 'error');
+        }
+      });
+
+      container.appendChild(button);
+    });
+  }
+
+  // デバッグ用：プリセット設定をリセットする関数
+  async function resetPresetSettings() {
+    try {
+      const allPresets = Array.from(window.presetLoader.presets.keys());
+      const newSettings = {
+        enabledPresets: allPresets,
+        presetOrder: allPresets
+      };
+
+      window.presetLoader.userSettings = newSettings;
+      await window.presetLoader.saveUserSettings();
+      console.log('Reset preset settings to show all presets');
+    } catch (error) {
+      console.error('Failed to reset preset settings:', error);
+    }
+  }
+
+
   } catch (error) {
     console.error('Error in popup initialization:', error);
   }

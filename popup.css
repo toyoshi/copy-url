@@ -6,12 +6,18 @@
 
 body {
   width: 320px;
+  min-height: 400px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #f8f9fa;
 }
 
+body.modal-open {
+  width: 500px;
+  min-height: 600px;
+}
+
 .container {
-  padding: 20px 20px 16px 20px;
+  padding: 16px 20px;
 }
 
 h1 {
@@ -36,23 +42,29 @@ h1 {
 }
 
 .copy-buttons {
+  margin: 8px 0;
+}
+
+#preset-buttons-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .copy-btn {
   background: white;
   border: 1px solid #e1e5e9;
   border-radius: 8px;
-  padding: 16px;
+  padding: 12px 16px;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
 }
 
 .copy-btn:hover {
@@ -66,54 +78,12 @@ h1 {
   box-shadow: 0 1px 4px rgba(0, 123, 255, 0.2);
 }
 
-.custom-format-btn {
-  /* HTML形式と同じ色を使用 */
-}
-
-.btn-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
-
-.btn-actions {
-  display: flex;
-  gap: 4px;
-}
-
-.edit-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 2px;
-  border-radius: 4px;
-  font-size: 12px;
-  transition: background-color 0.2s ease;
-}
-
-.edit-btn:hover {
-  background-color: rgba(0, 123, 255, 0.1);
-}
-
-.delete-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 2px;
-  border-radius: 4px;
-  font-size: 12px;
-  transition: background-color 0.2s ease;
-}
-
-.delete-btn:hover {
-  background-color: rgba(220, 53, 69, 0.1);
-}
 
 .btn-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #333;
+  flex: 1;
 }
 
 .btn-desc {
@@ -147,6 +117,243 @@ h1 {
   border: 1px solid #c3e6cb;
 }
 
+/* プリセット関連のスタイル */
+.preset-management {
+  margin: 16px 0 8px 0;
+}
+
+.preset-manage-btn {
+  width: 100%;
+  background: #f8f9fa;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  padding: 10px 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #6c757d;
+  transition: all 0.2s ease;
+}
+
+.preset-manage-btn:hover {
+  background: #e9ecef;
+  border-color: #ced4da;
+}
+
+.preset-btn {
+  position: relative;
+}
+
+.preset-icon {
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+/* モーダルスタイル */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 95%;
+  max-width: 480px;
+  max-height: 95vh;
+  height: auto;
+  min-height: 500px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #f8f9fa;
+}
+
+.modal-body {
+  padding: 20px;
+  max-height: 60vh;
+  min-height: 350px;
+  overflow-y: auto;
+}
+
+.modal-description {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+.preset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preset-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: move;
+}
+
+.preset-item:hover {
+  background: #e9ecef;
+  border-color: #007bff;
+}
+
+.preset-item.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+.preset-item.drag-over {
+  border-color: #007bff;
+  background: #e3f2fd;
+}
+
+.preset-drag-handle {
+  cursor: grab;
+  color: #6c757d;
+  font-size: 14px;
+  user-select: none;
+}
+
+.preset-drag-handle:active {
+  cursor: grabbing;
+}
+
+.preset-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preset-info .preset-icon {
+  font-size: 16px;
+  margin-right: 0;
+}
+
+.preset-info .preset-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.preset-controls {
+  display: flex;
+  gap: 16px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #6c757d;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin: 0;
+  transform: scale(0.9);
+}
+
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e1e5e9;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.modal-footer .save-btn,
+.modal-footer .cancel-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.2s ease;
+}
+
+.modal-footer .save-btn {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.modal-footer .save-btn:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+.modal-footer .cancel-btn {
+  background: white;
+  color: #6c757d;
+  border-color: #e1e5e9;
+}
+
+.modal-footer .cancel-btn:hover {
+  background: #f8f9fa;
+  border-color: #ced4da;
+}
+
+.status.info {
+  background: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
+
 .status.error {
   background: #f8d7da;
   color: #721c24;
@@ -164,352 +371,5 @@ h1 {
   }
 }
 
-/* カスタム形式セクション */
-.custom-section {
-  margin-top: 6px;
-  padding-top: 6px;
-}
 
-.custom-toggle {
-  background: none;
-  border: none;
-  color: #007bff;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 0;
-  width: 100%;
-  text-align: left;
-  transition: color 0.2s ease;
-}
-
-.custom-toggle:hover {
-  color: #0056b3;
-}
-
-.toggle-icon {
-  font-size: 10px;
-  transition: transform 0.2s ease;
-}
-
-.toggle-icon.rotated {
-  transform: rotate(180deg);
-}
-
-.custom-panel {
-  background: #f8f9fa;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 8px;
-  animation: slideDown 0.3s ease;
-}
-
-.custom-panel.hidden {
-  display: none;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 300px;
-  }
-}
-
-.custom-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.format-name-section {
-  margin-bottom: 4px;
-}
-
-.format-name-section label {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
-}
-
-#format-name {
-  width: 100%;
-  border: 1px solid #e1e5e9;
-  border-radius: 4px;
-  padding: 6px 8px;
-  font-size: 11px;
-  font-family: inherit;
-}
-
-#format-name:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
-}
-
-.custom-form label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #333;
-}
-
-#custom-format {
-  width: 100%;
-  border: 1px solid #e1e5e9;
-  border-radius: 6px;
-  padding: 8px;
-  font-size: 12px;
-  font-family: 'Courier New', monospace;
-  resize: vertical;
-  min-height: 60px;
-}
-
-#custom-format:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
-}
-
-.replace-section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.replace-inputs {
-  display: flex;
-  gap: 8px;
-}
-
-.replace-input-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.replace-input-group label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #333;
-}
-
-.replace-input-group input {
-  width: 100%;
-  border: 1px solid #e1e5e9;
-  border-radius: 4px;
-  padding: 6px 8px;
-  font-size: 11px;
-  font-family: 'Courier New', monospace;
-}
-
-.replace-input-group input:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
-}
-
-.regex-help {
-  margin-top: 4px;
-}
-
-.regex-help small {
-  color: #666;
-  font-size: 10px;
-  line-height: 1.3;
-}
-
-.saved-formats {
-  margin-top: 16px;
-  border-top: 1px solid #e1e5e9;
-  padding-top: 12px;
-}
-
-.saved-formats h4 {
-  margin: 0 0 8px 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: #333;
-}
-
-.formats-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.saved-format-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  background: #f8f9fa;
-  border: 1px solid #e1e5e9;
-  border-radius: 6px;
-  font-size: 11px;
-  transition: background-color 0.2s ease;
-}
-
-.saved-format-item:hover {
-  background: #e9ecef;
-}
-
-.format-info {
-  flex: 1;
-  min-width: 0;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-}
-
-.format-info:hover {
-  background-color: rgba(0, 123, 255, 0.1);
-}
-
-.format-name {
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.format-preview {
-  color: #666;
-  font-size: 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.format-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.edit-link {
-  color: #007bff;
-  text-decoration: none;
-  font-size: 10px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 3px;
-  transition: background-color 0.2s;
-}
-
-.edit-link:hover {
-  background-color: rgba(0, 123, 255, 0.1);
-}
-
-.edit-actions {
-  display: flex;
-  gap: 4px;
-}
-
-.edit-action {
-  color: #007bff;
-  text-decoration: none;
-  font-size: 9px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 1px 3px;
-  border-radius: 2px;
-  transition: background-color 0.2s;
-}
-
-.edit-action:hover {
-  background-color: rgba(0, 123, 255, 0.1);
-}
-
-.edit-action.delete {
-  color: #dc3545;
-}
-
-.edit-action.delete:hover {
-  background-color: rgba(220, 53, 69, 0.1);
-}
-
-.no-formats {
-  text-align: center;
-  color: #666;
-  font-size: 11px;
-  padding: 16px;
-  font-style: italic;
-}
-
-.preview-section {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.preview-box {
-  background: white;
-  border: 1px solid #e1e5e9;
-  border-radius: 6px;
-  padding: 8px;
-  font-size: 12px;
-  font-family: 'Courier New', monospace;
-  min-height: 40px;
-  word-break: break-all;
-  color: #6c757d;
-}
-
-.custom-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.save-btn, .cancel-btn, .delete-btn-form {
-  padding: 6px 12px;
-  border: 1px solid #e1e5e9;
-  border-radius: 4px;
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.save-btn {
-  background: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
-.save-btn:hover {
-  background: #0056b3;
-  border-color: #0056b3;
-}
-
-.cancel-btn {
-  background: white;
-  color: #6c757d;
-}
-
-.cancel-btn:hover {
-  background: #f8f9fa;
-  border-color: #adb5bd;
-}
-
-.delete-btn-form {
-  background: #dc3545;
-  color: white;
-  border-color: #dc3545;
-}
-
-.delete-btn-form:hover {
-  background: #c82333;
-  border-color: #c82333;
-} 
+ 
