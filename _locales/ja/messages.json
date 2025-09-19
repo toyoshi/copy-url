@@ -4,147 +4,31 @@
     "description": "Extension name"
   },
   "appDescription": {
-    "message": "URLを3つの形式（タイトル+URL、Markdown、HTML）でコピー。完全無料で追加料金不要です。",
+    "message": "URLを5つのプリセット形式でコピー、順序と表示のカスタマイズ可能。完全無料で追加料金不要です。",
     "description": "Extension description"
   },
-  "popupTitle": {
-    "message": "Just URL COPY FREE",
-    "description": "Popup title"
+  "managePresets": {
+    "message": "プリセット管理",
+    "description": "Preset management button text"
   },
-  "appSubtitle": {
-    "message": "URLを複数の形式でコピー",
-    "description": "App subtitle"
+  "presetCopied": {
+    "message": "コピーしました",
+    "description": "Success message when preset is copied"
   },
-  "copyTitleUrl": {
-    "message": "タイトル + URL",
-    "description": "Copy button for title and URL format"
+  "presetNotApplicable": {
+    "message": "このURLには適用できません",
+    "description": "Message when preset is not applicable"
   },
-  "copyTitleUrlDesc": {
-    "message": "ページタイトル - https://example.com/page",
-    "description": "Description for title and URL format"
+  "presetError": {
+    "message": "プリセット実行エラー",
+    "description": "Error message when preset execution fails"
   },
-  "copyMarkdown": {
-    "message": "Markdown形式",
-    "description": "Copy button for markdown format"
-  },
-  "copyMarkdownDesc": {
-    "message": "[ページタイトル](https://example.com/page)",
-    "description": "Description for markdown format"
-  },
-  "copyHtml": {
-    "message": "HTML形式",
-    "description": "Copy button for HTML format"
-  },
-  "copyHtmlDesc": {
-    "message": "<a href=\"...\">ページタイトル</a>",
-    "description": "Description for HTML format"
-  },
-  "copySuccessTitleUrl": {
-    "message": "タイトル + URLをコピーしました",
-    "description": "Success message for title and URL copy"
-  },
-  "copySuccessMarkdown": {
-    "message": "Markdown形式でコピーしました",
-    "description": "Success message for markdown copy"
-  },
-  "copySuccessHtml": {
-    "message": "HTML形式でコピーしました",
-    "description": "Success message for HTML copy"
+  "presetSettingsSaved": {
+    "message": "プリセット設定を保存しました",
+    "description": "Success message when preset settings are saved"
   },
   "copyError": {
     "message": "コピーに失敗しました",
     "description": "Error message when copy fails"
-  },
-  "customFormat": {
-    "message": "独自形式を定義する",
-    "description": "Custom format toggle button"
-  },
-  "formatLabel": {
-    "message": "フォーマット定義:",
-    "description": "Label for format input"
-  },
-  "replaceLabel": {
-    "message": "置換ルール（オプション）:",
-    "description": "Label for replace section"
-  },
-  "searchLabel": {
-    "message": "正規表現:",
-    "description": "Label for regex input"
-  },
-  "replaceWithLabel": {
-    "message": "置換:",
-    "description": "Label for replace input"
-  },
-  "regexHelp": {
-    "message": "例: / - /g で「 - 」を全て置換、/^(.+)$/ で行全体をキャプチャ",
-    "description": "Help text for regex usage"
-  },
-  "previewLabel": {
-    "message": "プレビュー:",
-    "description": "Label for preview section"
-  },
-  "savedFormatsTitle": {
-    "message": "保存された形式",
-    "description": "Title for saved formats section"
-  },
-  "editLink": {
-    "message": "編集",
-    "description": "Edit link text"
-  },
-  "saveAction": {
-    "message": "保存",
-    "description": "Save action text"
-  },
-  "cancelAction": {
-    "message": "キャンセル",
-    "description": "Cancel action text"
-  },
-  "deleteAction": {
-    "message": "削除",
-    "description": "Delete action text"
-  },
-  "formatNameLabel": {
-    "message": "形式名:",
-    "description": "Label for format name input"
-  },
-  "formatNameRequired": {
-    "message": "形式名を入力してください",
-    "description": "Error message when format name is missing"
-  },
-  "formatRequired": {
-    "message": "フォーマット定義を入力してください",
-    "description": "Error message when format definition is missing"
-  },
-  "formatSaved": {
-    "message": "形式を保存しました",
-    "description": "Success message when format is saved"
-  },
-  "formatDeleted": {
-    "message": "形式を削除しました",
-    "description": "Success message when format is deleted"
-  },
-  "customFormatCopied": {
-    "message": "カスタム形式でコピーしました",
-    "description": "Success message when custom format is copied"
-  },
-  "saveButton": {
-    "message": "保存",
-    "description": "Save button text"
-  },
-  "cancelButton": {
-    "message": "キャンセル",
-    "description": "Cancel button text"
-  },
-  "deleteConfirm": {
-    "message": "この形式を削除しますか？",
-    "description": "Delete confirmation message"
-  },
-  "deleteButton": {
-    "message": "削除",
-    "description": "Delete button text"
-  },
-  "noFormatToDelete": {
-    "message": "削除する形式が選択されていません",
-    "description": "Error message when no format is selected for deletion"
   }
 } 

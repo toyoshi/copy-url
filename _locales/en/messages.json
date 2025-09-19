@@ -4,147 +4,31 @@
     "description": "Extension name"
   },
   "appDescription": {
-    "message": "Copy URLs in 3 formats (Title+URL, Markdown, HTML). Completely FREE with no additional charges required.",
+    "message": "Copy URLs in 5 preset formats with customizable order and visibility. Completely FREE with no additional charges required.",
     "description": "Extension description"
   },
-  "popupTitle": {
-    "message": "Just URL COPY FREE",
-    "description": "Popup title"
+  "managePresets": {
+    "message": "Manage Presets",
+    "description": "Preset management button text"
   },
-  "appSubtitle": {
-    "message": "Copy URLs in multiple formats",
-    "description": "App subtitle"
+  "presetCopied": {
+    "message": "Copied",
+    "description": "Success message when preset is copied"
   },
-  "copyTitleUrl": {
-    "message": "Title + URL",
-    "description": "Copy button for title and URL format"
+  "presetNotApplicable": {
+    "message": "Not applicable for this URL",
+    "description": "Message when preset is not applicable"
   },
-  "copyTitleUrlDesc": {
-    "message": "Page Title - https://example.com/page",
-    "description": "Description for title and URL format"
+  "presetError": {
+    "message": "Preset execution error",
+    "description": "Error message when preset execution fails"
   },
-  "copyMarkdown": {
-    "message": "Markdown Format",
-    "description": "Copy button for markdown format"
-  },
-  "copyMarkdownDesc": {
-    "message": "[Page Title](https://example.com/page)",
-    "description": "Description for markdown format"
-  },
-  "copyHtml": {
-    "message": "HTML Format",
-    "description": "Copy button for HTML format"
-  },
-  "copyHtmlDesc": {
-    "message": "<a href=\"...\">Page Title</a>",
-    "description": "Description for HTML format"
-  },
-  "copySuccessTitleUrl": {
-    "message": "Title + URL copied successfully",
-    "description": "Success message for title and URL copy"
-  },
-  "copySuccessMarkdown": {
-    "message": "Markdown format copied successfully",
-    "description": "Success message for markdown copy"
-  },
-  "copySuccessHtml": {
-    "message": "HTML format copied successfully",
-    "description": "Success message for HTML copy"
+  "presetSettingsSaved": {
+    "message": "Preset settings saved",
+    "description": "Success message when preset settings are saved"
   },
   "copyError": {
     "message": "Failed to copy",
     "description": "Error message when copy fails"
-  },
-  "customFormat": {
-    "message": "Define custom format",
-    "description": "Custom format toggle button"
-  },
-  "formatLabel": {
-    "message": "Format definition:",
-    "description": "Label for format input"
-  },
-  "replaceLabel": {
-    "message": "Replace rule (optional):",
-    "description": "Label for replace section"
-  },
-  "searchLabel": {
-    "message": "Regex:",
-    "description": "Label for regex input"
-  },
-  "replaceWithLabel": {
-    "message": "Replace:",
-    "description": "Label for replace input"
-  },
-  "regexHelp": {
-    "message": "Example: / - /g to replace all \" - \", /^(.+)$/ to capture entire line",
-    "description": "Help text for regex usage"
-  },
-  "previewLabel": {
-    "message": "Preview:",
-    "description": "Label for preview section"
-  },
-  "savedFormatsTitle": {
-    "message": "Saved Formats",
-    "description": "Title for saved formats section"
-  },
-  "editLink": {
-    "message": "Edit",
-    "description": "Edit link text"
-  },
-  "saveAction": {
-    "message": "Save",
-    "description": "Save action text"
-  },
-  "cancelAction": {
-    "message": "Cancel",
-    "description": "Cancel action text"
-  },
-  "deleteAction": {
-    "message": "Delete",
-    "description": "Delete action text"
-  },
-  "formatNameLabel": {
-    "message": "Format Name:",
-    "description": "Label for format name input"
-  },
-  "formatNameRequired": {
-    "message": "Format name is required",
-    "description": "Error message when format name is missing"
-  },
-  "formatRequired": {
-    "message": "Format definition is required",
-    "description": "Error message when format definition is missing"
-  },
-  "formatSaved": {
-    "message": "Format saved successfully",
-    "description": "Success message when format is saved"
-  },
-  "formatDeleted": {
-    "message": "Format deleted successfully",
-    "description": "Success message when format is deleted"
-  },
-  "customFormatCopied": {
-    "message": "Custom format copied successfully",
-    "description": "Success message when custom format is copied"
-  },
-  "saveButton": {
-    "message": "Save",
-    "description": "Save button text"
-  },
-  "cancelButton": {
-    "message": "Cancel",
-    "description": "Cancel button text"
-  },
-  "deleteConfirm": {
-    "message": "Are you sure you want to delete this format?",
-    "description": "Delete confirmation message"
-  },
-  "deleteButton": {
-    "message": "Delete",
-    "description": "Delete button text"
-  },
-  "noFormatToDelete": {
-    "message": "No format selected for deletion",
-    "description": "Error message when no format is selected for deletion"
   }
 } 
